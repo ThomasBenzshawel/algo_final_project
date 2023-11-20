@@ -51,9 +51,20 @@ LEFT_FACING = 1
 
 
 class PlayerCharacter(arcade.Sprite):
-    def __init__(self, bar_list):
+    """
+    Represents player character.
+    Based off of this tutorial: https://api.arcade.academy/en/stable/examples/sprite_move_animation.html
 
-        # Set up parent class
+    :param arcade.Sprite: The player sprite.
+    """
+    def __init__(self, bar_list):
+        """
+        Initialize object.
+
+        :param bar_list: Bars for healthbar.
+        """
+
+        # CALL PARENT
         super().__init__()
 
         # SET UP HEALTH
@@ -61,43 +72,48 @@ class PlayerCharacter(arcade.Sprite):
         self.health_bar = HealthBar(self, bar_list, (self.center_x, self.center_y))
 
         # Default to face-right
+        # DEFAULT CHARACTER TO FACE RIGHT
         self.character_face_direction = RIGHT_FACING
 
-        # Used for flipping between image sequences
+        # FLIPPING BETWEEN ANIMATION IMAGES
         self.cur_texture = 0
 
+        # SCALE PLAYER
         self.scale = SPRITE_SCALING_PLAYER
 
-        # Adjust the collision box. Default includes too much empty space
-        # side-to-side. Box is centered at sprite center, (0, 0)
+        # ADJUST COLLISION BOX TO REMOVE EMPTY SPACE.
         self.points = [[-22, -64], [22, -64], [22, 28], [-22, 28]]
 
-        # --- Load Textures ---
+        # LOAD SPRITES
         main_path = ":resources:images/animated_characters/robot/robot"
 
-        # Load textures for idle standing
+        # MAKE IDLE TEXTURE
         self.idle_texture_pair = load_texture_pair(f"{main_path}_idle.png")
 
-        # Load textures for walking
+        # LOAD WALKING TEXTURES
         self.walk_textures = []
         for i in range(8):
             texture = load_texture_pair(f"{main_path}_walk{i}.png")
             self.walk_textures.append(texture)
 
     def update_animation(self, delta_time: float = 1 / 60):
+        """
+        Update character animation.
 
-        # Figure out if we need to flip face left or right
+        :param delta_time: One second
+        """
+        # FLIP IMAGE BASED ON FACING DIRECTION
         if self.change_x < 0 and self.character_face_direction == RIGHT_FACING:
             self.character_face_direction = LEFT_FACING
         elif self.change_x > 0 and self.character_face_direction == LEFT_FACING:
             self.character_face_direction = RIGHT_FACING
 
-        # Idle animation
+        # IDLE
         if self.change_x == 0 and self.change_y == 0:
             self.texture = self.idle_texture_pair[self.character_face_direction]
             return
 
-        # Walking animation
+        # MOVING
         self.cur_texture += 1
         if self.cur_texture > 7 * UPDATES_PER_FRAME:
             self.cur_texture = 0
@@ -112,8 +128,7 @@ class HealthBar:
     TAKEN FROM https://api.arcade.academy/en/latest/examples/sprite_health.html
 
     :param Player owner: The owner of this indicator bar.
-    :param arcade.SpriteList sprite_list: The sprite list used to draw the indicator
-    bar components.
+    :param arcade.SpriteList sprite_list: The sprite list used to draw the indicator bar components.
     :param Tuple[float, float] position: The initial position of the bar.
     :param arcade.Color full_color: The color of the bar.
     :param arcade.Color background_color: The background color of the bar.
@@ -122,17 +137,15 @@ class HealthBar:
     :param int border_size: The size of the bar's border.
     """
 
-    def __init__(
-            self,
-            owner: PlayerCharacter,
-            sprite_list: arcade.SpriteList,
-            position: Tuple[float, float] = (0, 0),
-            full_color: arcade.Color = arcade.color.GREEN,
-            background_color: arcade.Color = arcade.color.BLACK,
-            width: int = 100,
-            height: int = 4,
-            border_size: int = 4,
-    ) -> None:
+    def __init__(self,
+                 owner: PlayerCharacter,
+                 sprite_list: arcade.SpriteList,
+                 position: Tuple[float, float] = (0, 0),
+                 full_color: arcade.Color = arcade.color.GREEN,
+                 background_color: arcade.Color = arcade.color.BLACK,
+                 width: int = 100,
+                 height: int = 4,
+                 border_size: int = 4,) -> None:
         # Store the reference to the owner and the sprite list
         self.owner: PlayerCharacter = owner
         self.sprite_list: arcade.SpriteList = sprite_list
@@ -145,21 +158,17 @@ class HealthBar:
         self._center_y: float = 0.0
         self._fullness: float = 0.0
 
-        # Create the boxes needed to represent the indicator bar
-        self._background_box: arcade.SpriteSolidColor = arcade.SpriteSolidColor(
-            self._box_width + border_size,
-            self._box_height + border_size,
-            background_color,
-            )
-        self._full_box: arcade.SpriteSolidColor = arcade.SpriteSolidColor(
-            self._box_width,
-            self._box_height,
-            full_color,
-        )
+        # CREATE BOXES TO MAKE HEALTH BAR
+        self._background_box: arcade.SpriteSolidColor = arcade.SpriteSolidColor(self._box_width + border_size,
+                                                                                self._box_height + border_size,
+                                                                                background_color,)
+        self._full_box: arcade.SpriteSolidColor = arcade.SpriteSolidColor(self._box_width,
+                                                                          self._box_height,
+                                                                          full_color,)
         self.sprite_list.append(self._background_box)
         self.sprite_list.append(self._full_box)
 
-        # Set the fullness and position of the bar
+        # SET FULLNESS BASED OFF HEALTH
         self.fullness: float = 1.0
         self.position: Tuple[float, float] = position
 
@@ -237,6 +246,8 @@ def new_flock(count, lower_limits, upper_limits):
 class MyGame(arcade.Window):
     """
     Main application class.
+
+    :param arcade.Window: The window the game is displayed on.
     """
 
     def __init__(self):
@@ -269,7 +280,7 @@ class MyGame(arcade.Window):
         self.score_text = None
 
         # SOUNDS
-        # Sounds from kenney.nl
+        # TODO - CHECK
         self.gun_sound = arcade.sound.load_sound(":resources:sounds/laser1.wav")
         self.hit_sound = arcade.sound.load_sound(":resources:sounds/phaseJump1.wav")
 

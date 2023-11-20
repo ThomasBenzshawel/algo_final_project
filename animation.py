@@ -56,6 +56,7 @@ def load_texture_pair(filename):
 
 
 class PlayerCharacter(arcade.Sprite):
+
     def __init__(self):
 
         # Set up parent class
