@@ -269,6 +269,7 @@ class MyGame(arcade.Window):
         self.player_list = None
         self.coin_list = None
         self.bullet_list = None
+        self.tree_list = None
 
         # BOID INFO
         self.positions = None
@@ -300,6 +301,7 @@ class MyGame(arcade.Window):
         self.player_list = arcade.SpriteList()
         self.coin_list = arcade.SpriteList()
         self.bullet_list = arcade.SpriteList()
+        self.tree_list = arcade.SpriteList()
 
         # RESET SCORE
         self.score = 0
@@ -329,8 +331,17 @@ class MyGame(arcade.Window):
             # Add the coin to the lists
             self.coin_list.append(coin)
 
-        # Set the background color
-        arcade.set_background_color(arcade.color.AMAZON)
+        # TODO PLACE TREES
+        for i in range(0, 10):
+            tree = arcade.Sprite("images/tree.png", .75)
+
+            # Position the coin
+            tree.center_x = self.positions[0][i]
+            tree.center_y = self.positions[1][i]
+
+            # Add the coin to the lists
+            self.tree_list.append(tree)
+
 
     def on_draw(self):
         """
@@ -350,6 +361,7 @@ class MyGame(arcade.Window):
         self.bullet_list.draw()
         self.player_list.draw()
         self.bar_list.draw()
+        self.tree_list.draw()
 
         # PUT SCORE ON THE SCREEN
         output = f"Score: {self.score}"
