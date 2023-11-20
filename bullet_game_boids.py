@@ -284,14 +284,18 @@ class MyGame(arcade.Window):
         self.gun_sound = arcade.sound.load_sound(":resources:sounds/laser1.wav")
         self.hit_sound = arcade.sound.load_sound(":resources:sounds/phaseJump1.wav")
 
-        # SET BACKGROUND COLOR
-        arcade.set_background_color(arcade.color.AMAZON)
+        # SCENE DESIGN
+        # arcade.set_background_color(arcade.color.AMAZON)
+        self.background = None
 
     def setup(self):
         """
         Set up the game and initialize the variables.
         """
-        # Sprite lists
+        # SET BACKGROUND
+        self.background = arcade.load_texture("images/grass.png")
+
+        # SPRITE LISTS
         self.bar_list = arcade.SpriteList()
         self.player_list = arcade.SpriteList()
         self.coin_list = arcade.SpriteList()
@@ -335,6 +339,11 @@ class MyGame(arcade.Window):
         # START RENDERING PROCESS
         self.clear()
         arcade.start_render()
+
+        # DRAW BACKGROUND
+        arcade.draw_lrwh_rectangle_textured(0, 0,
+                                            SCREEN_WIDTH, SCREEN_HEIGHT,
+                                            self.background)
 
         # DRAW ALL SPRITES
         self.coin_list.draw()
