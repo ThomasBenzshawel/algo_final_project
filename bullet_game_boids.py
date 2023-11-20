@@ -11,7 +11,7 @@ python -m arcade.examples.sprite_bullets_aimed
 """
 
 # IMPORT LIBRARIES
-import random
+from typing import Tuple
 import arcade
 import math
 import os
@@ -24,6 +24,11 @@ SPRITE_SCALING_LASER = 0.8
 
 # SET ENEMY COUNT
 COIN_COUNT = 50
+
+# SET HEALTH & DAMAGE DATA
+HEALTH_BAR_OFFSET = 32
+BIRD_DAMAGE = -2
+PLAYER_HEALTH = 100
 
 # SET SCREEN
 SCREEN_WIDTH = 800
@@ -46,10 +51,14 @@ LEFT_FACING = 1
 
 
 class PlayerCharacter(arcade.Sprite):
-    def __init__(self):
+    def __init__(self, bar_list):
 
         # Set up parent class
         super().__init__()
+
+        # SET UP HEALTH
+        self.health = PLAYER_HEALTH
+        self.health_bar = HealthBar(self, bar_list, (self.center_x, self.center_y))
 
         # Default to face-right
         self.character_face_direction = RIGHT_FACING
@@ -64,13 +73,6 @@ class PlayerCharacter(arcade.Sprite):
         self.points = [[-22, -64], [22, -64], [22, 28], [-22, 28]]
 
         # --- Load Textures ---
-
-        # Images from Kenney.nl's Asset Pack 3
-        # main_path = ":resources:images/animated_characters/female_adventurer/femaleAdventurer"
-        # main_path = ":resources:images/animated_characters/female_person/femalePerson"
-        # main_path = ":resources:images/animated_characters/male_person/malePerson"
-        # main_path = ":resources:images/animated_characters/male_adventurer/maleAdventurer"
-        # main_path = ":resources:images/animated_characters/zombie/zombie"
         main_path = ":resources:images/animated_characters/robot/robot"
 
         # Load textures for idle standing
@@ -104,6 +106,119 @@ class PlayerCharacter(arcade.Sprite):
         self.texture = self.walk_textures[frame][direction]
 
 
+class HealthBar:
+    """
+    Represents a bar which can display information about a sprite.
+    TAKEN FROM https://api.arcade.academy/en/latest/examples/sprite_health.html
+
+    :param Player owner: The owner of this indicator bar.
+    :param arcade.SpriteList sprite_list: The sprite list used to draw the indicator
+    bar components.
+    :param Tuple[float, float] position: The initial position of the bar.
+    :param arcade.Color full_color: The color of the bar.
+    :param arcade.Color background_color: The background color of the bar.
+    :param int width: The width of the bar.
+    :param int height: The height of the bar.
+    :param int border_size: The size of the bar's border.
+    """
+
+    def __init__(
+            self,
+            owner: PlayerCharacter,
+            sprite_list: arcade.SpriteList,
+            position: Tuple[float, float] = (0, 0),
+            full_color: arcade.Color = arcade.color.GREEN,
+            background_color: arcade.Color = arcade.color.BLACK,
+            width: int = 100,
+            height: int = 4,
+            border_size: int = 4,
+    ) -> None:
+        # Store the reference to the owner and the sprite list
+        self.owner: PlayerCharacter = owner
+        self.sprite_list: arcade.SpriteList = sprite_list
+
+        # Set the needed size variables
+        self._box_width: int = width
+        self._box_height: int = height
+        self._half_box_width: int = self._box_width // 2
+        self._center_x: float = 0.0
+        self._center_y: float = 0.0
+        self._fullness: float = 0.0
+
+        # Create the boxes needed to represent the indicator bar
+        self._background_box: arcade.SpriteSolidColor = arcade.SpriteSolidColor(
+            self._box_width + border_size,
+            self._box_height + border_size,
+            background_color,
+            )
+        self._full_box: arcade.SpriteSolidColor = arcade.SpriteSolidColor(
+            self._box_width,
+            self._box_height,
+            full_color,
+        )
+        self.sprite_list.append(self._background_box)
+        self.sprite_list.append(self._full_box)
+
+        # Set the fullness and position of the bar
+        self.fullness: float = 1.0
+        self.position: Tuple[float, float] = position
+
+    def __repr__(self) -> str:
+        return f"<IndicatorBar (Owner={self.owner})>"
+
+    @property
+    def background_box(self) -> arcade.SpriteSolidColor:
+        """Returns the background box of the indicator bar."""
+        return self._background_box
+
+    @property
+    def full_box(self) -> arcade.SpriteSolidColor:
+        """Returns the full box of the indicator bar."""
+        return self._full_box
+
+    @property
+    def fullness(self) -> float:
+        """Returns the fullness of the bar."""
+        return self._fullness
+
+    @fullness.setter
+    def fullness(self, new_fullness: float) -> None:
+        """Sets the fullness of the bar."""
+        # Check if new_fullness if valid
+        if not (0.0 <= new_fullness <= 1.0):
+            raise ValueError(
+                f"Got {new_fullness}, but fullness must be between 0.0 and 1.0."
+            )
+
+        # Set the size of the bar
+        self._fullness = new_fullness
+        if new_fullness == 0.0:
+            # Set the full_box to not be visible since it is not full anymore
+            self.full_box.visible = False
+        else:
+            # Set the full_box to be visible incase it wasn't then update the bar
+            self.full_box.visible = True
+            self.full_box.width = self._box_width * new_fullness
+            self.full_box.left = self._center_x - (self._box_width // 2)
+
+    @property
+    def position(self) -> Tuple[float, float]:
+        """Returns the current position of the bar."""
+        return self._center_x, self._center_y
+
+    @position.setter
+    def position(self, new_position: Tuple[float, float]) -> None:
+        """Sets the new position of the bar."""
+        # Check if the position has changed. If so, change the bar's position
+        if new_position != self.position:
+            self._center_x, self._center_y = new_position
+            self.background_box.position = new_position
+            self.full_box.position = new_position
+
+            # Make sure full_box is to the left of the bar instead of the middle
+            self.full_box.left = self._center_x - (self._box_width // 2)
+
+
 def load_texture_pair(filename):
     """
     Load a texture pair, with the second being a mirror image.
@@ -111,12 +226,12 @@ def load_texture_pair(filename):
     :param filename: The texture file.
     """
     return [arcade.load_texture(filename),
-            arcade.load_texture(filename, flipped_horizontally = True)]
+            arcade.load_texture(filename, flipped_horizontally=True)]
 
 
 def new_flock(count, lower_limits, upper_limits):
     width = upper_limits - lower_limits
-    return (lower_limits[:, np.newaxis] + np.random.rand(2, count) * width[:, np.newaxis])
+    return lower_limits[:, np.newaxis] + np.random.rand(2, count) * width[:, np.newaxis]
 
 
 class MyGame(arcade.Window):
@@ -139,11 +254,12 @@ class MyGame(arcade.Window):
         os.chdir(file_path)
 
         # SPRITE LISTS
+        self.bar_list = None
         self.player_list = None
         self.coin_list = None
         self.bullet_list = None
 
-        #BOID INFO
+        # BOID INFO
         self.positions = None
         self.velocities = None
 
@@ -165,6 +281,7 @@ class MyGame(arcade.Window):
         Set up the game and initialize the variables.
         """
         # Sprite lists
+        self.bar_list = arcade.SpriteList()
         self.player_list = arcade.SpriteList()
         self.coin_list = arcade.SpriteList()
         self.bullet_list = arcade.SpriteList()
@@ -173,7 +290,7 @@ class MyGame(arcade.Window):
         self.score = 0
 
         # Image from kenney.nl "
-        self.player_sprite = PlayerCharacter()
+        self.player_sprite = PlayerCharacter(self.bar_list)
         self.player_sprite.center_x = 50
         self.player_sprite.center_y = 70
         self.player_list.append(self.player_sprite)
@@ -187,7 +304,7 @@ class MyGame(arcade.Window):
         for i in range(len(self.positions[0])):
             # Create the coin instance
             # Coin image from kenney.nl
-            #coin = arcade.Sprite(":resources:images/items/coinGold.png", SPRITE_SCALING_COIN)
+            # coin = arcade.Sprite(":resources:images/items/coinGold.png", SPRITE_SCALING_COIN)
             coin = arcade.Sprite("images/bird.gif", SPRITE_SCALING_COIN)
 
             # Position the coin
@@ -212,6 +329,7 @@ class MyGame(arcade.Window):
         self.coin_list.draw()
         self.bullet_list.draw()
         self.player_list.draw()
+        self.bar_list.draw()
 
         # PUT SCORE ON THE SCREEN
         output = f"Score: {self.score}"
@@ -308,9 +426,11 @@ class MyGame(arcade.Window):
         :param delta_time: TODO
         """
         # UPDATE PLAYER LOCATION
-        #self.player_sprite.center_x += self.player_sprite.change_x
-        #self.player_sprite.center_y += self.player_sprite.change_y
+        # self.player_sprite.center_x += self.player_sprite.change_x
+        # self.player_sprite.center_y += self.player_sprite.change_y
         self.player_list.update()
+        self.player_sprite.health_bar.position = (self.player_sprite.center_x,
+                                                     self.player_sprite.center_y + HEALTH_BAR_OFFSET,)
 
         # UPDATE PLAYER ANIMATION
         self.player_list.update_animation()
@@ -337,6 +457,20 @@ class MyGame(arcade.Window):
             if bullet.bottom > self.width or bullet.top < 0 or bullet.right < 0 or bullet.left > self.width:
                 bullet.remove_from_sprite_lists()
 
+        # CHECK IF ENEMY HIT PLAYER
+        for coin in self.coin_list:
+            attack_list = arcade.check_for_collision_with_list(coin, self.player_list)
+
+            # ADJUST HEALTH FOR EACH HIT
+            if len(attack_list) > 0:
+                self.player_sprite.health = self.player_sprite.health + (BIRD_DAMAGE * len(attack_list))
+
+                # CHECK IF PLAYER IS DEAD, IF NOT UPDATE HEALTH BAR
+                if self.player_sprite.health <= 0:
+                    arcade.exit()
+                    self.player_sprite.health_bar.fullness = (0 / PLAYER_HEALTH)
+                else:
+                    self.player_sprite.health_bar.fullness = (self.player_sprite.health / PLAYER_HEALTH)
 
     def shoot_bullet(self, angle):
         """
@@ -364,7 +498,6 @@ class MyGame(arcade.Window):
         # ADD BULLET TO BULLET SPRITE LIST
         self.bullet_list.append(bullet)
 
-
     def update_boids(self, positions, velocities):
         for i in range(len(velocities[0])):
 
@@ -377,7 +510,6 @@ class MyGame(arcade.Window):
                 velocities[1][i] = velocities[1][i] + .5
             elif positions[1][i] > self.player_sprite.center_y:
                 velocities[1][i] = velocities[1][i] - .5
-
 
         move_to_middle_strength = 0.005
         middle = np.mean(positions, 1)
@@ -417,3 +549,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+#%%
