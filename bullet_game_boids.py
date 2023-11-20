@@ -19,11 +19,11 @@ import numpy as np
 
 # SET SCALING VALUES
 SPRITE_SCALING_PLAYER = 0.5
-SPRITE_SCALING_COIN = 0.2
+SPRITE_SCALING_COIN = 0.02
 SPRITE_SCALING_LASER = 0.8
 
 # SET ENEMY COUNT
-COIN_COUNT = 10
+COIN_COUNT = 50
 
 # SET SCREEN
 SCREEN_WIDTH = 800
@@ -33,11 +33,86 @@ window = None
 
 # SET SPEED VALUES
 PLAYER_SPEED = 5
-BULLET_SPEED = 5
+BULLET_SPEED = 10
 
 # SET USED KEYS
 MOVEMENT_KEYS = [arcade.key.LEFT, arcade.key.RIGHT, arcade.key.UP, arcade.key.DOWN]
 BULLET_SHOOTING_KEYS = [arcade.key.A, arcade.key.S, arcade.key.D, arcade.key.W]
+
+# PLAYER ANIMATION SETTINGS
+UPDATES_PER_FRAME = 5
+RIGHT_FACING = 0
+LEFT_FACING = 1
+
+
+class PlayerCharacter(arcade.Sprite):
+    def __init__(self):
+
+        # Set up parent class
+        super().__init__()
+
+        # Default to face-right
+        self.character_face_direction = RIGHT_FACING
+
+        # Used for flipping between image sequences
+        self.cur_texture = 0
+
+        self.scale = SPRITE_SCALING_PLAYER
+
+        # Adjust the collision box. Default includes too much empty space
+        # side-to-side. Box is centered at sprite center, (0, 0)
+        self.points = [[-22, -64], [22, -64], [22, 28], [-22, 28]]
+
+        # --- Load Textures ---
+
+        # Images from Kenney.nl's Asset Pack 3
+        # main_path = ":resources:images/animated_characters/female_adventurer/femaleAdventurer"
+        # main_path = ":resources:images/animated_characters/female_person/femalePerson"
+        # main_path = ":resources:images/animated_characters/male_person/malePerson"
+        # main_path = ":resources:images/animated_characters/male_adventurer/maleAdventurer"
+        # main_path = ":resources:images/animated_characters/zombie/zombie"
+        main_path = ":resources:images/animated_characters/robot/robot"
+
+        # Load textures for idle standing
+        self.idle_texture_pair = load_texture_pair(f"{main_path}_idle.png")
+
+        # Load textures for walking
+        self.walk_textures = []
+        for i in range(8):
+            texture = load_texture_pair(f"{main_path}_walk{i}.png")
+            self.walk_textures.append(texture)
+
+    def update_animation(self, delta_time: float = 1 / 60):
+
+        # Figure out if we need to flip face left or right
+        if self.change_x < 0 and self.character_face_direction == RIGHT_FACING:
+            self.character_face_direction = LEFT_FACING
+        elif self.change_x > 0 and self.character_face_direction == LEFT_FACING:
+            self.character_face_direction = RIGHT_FACING
+
+        # Idle animation
+        if self.change_x == 0 and self.change_y == 0:
+            self.texture = self.idle_texture_pair[self.character_face_direction]
+            return
+
+        # Walking animation
+        self.cur_texture += 1
+        if self.cur_texture > 7 * UPDATES_PER_FRAME:
+            self.cur_texture = 0
+        frame = self.cur_texture // UPDATES_PER_FRAME
+        direction = self.character_face_direction
+        self.texture = self.walk_textures[frame][direction]
+
+
+def load_texture_pair(filename):
+    """
+    Load a texture pair, with the second being a mirror image.
+
+    :param filename: The texture file.
+    """
+    return [arcade.load_texture(filename),
+            arcade.load_texture(filename, flipped_horizontally = True)]
+
 
 def new_flock(count, lower_limits, upper_limits):
     width = upper_limits - lower_limits
@@ -68,7 +143,6 @@ class MyGame(arcade.Window):
         self.coin_list = None
         self.bullet_list = None
 
-
         #BOID INFO
         self.positions = None
         self.velocities = None
@@ -98,22 +172,23 @@ class MyGame(arcade.Window):
         # RESET SCORE
         self.score = 0
 
-        # Image from kenney.nl
-        self.player_sprite = arcade.Sprite(":resources:images/animated_characters/female_person/femalePerson_idle.png", SPRITE_SCALING_PLAYER)
+        # Image from kenney.nl "
+        self.player_sprite = PlayerCharacter()
         self.player_sprite.center_x = 50
         self.player_sprite.center_y = 70
         self.player_list.append(self.player_sprite)
 
-
+        # RANDOM POSITIONS FOR BOIDS
         self.positions = new_flock(COIN_COUNT, np.array([0, 0]), np.array([SCREEN_WIDTH, SCREEN_HEIGHT]))
 
-        self.velocities = new_flock(COIN_COUNT, np.array([0, -5]), np.array([5, 10]))
+        self.velocities = new_flock(COIN_COUNT, np.array([0, -5]), np.array([2, 3]))
 
         # Create the coins
         for i in range(len(self.positions[0])):
             # Create the coin instance
             # Coin image from kenney.nl
-            coin = arcade.Sprite(":resources:images/items/coinGold.png", SPRITE_SCALING_COIN)
+            #coin = arcade.Sprite(":resources:images/items/coinGold.png", SPRITE_SCALING_COIN)
+            coin = arcade.Sprite("images/bird.gif", SPRITE_SCALING_COIN)
 
             # Position the coin
             coin.center_x = self.positions[0][i]
@@ -130,6 +205,7 @@ class MyGame(arcade.Window):
         Render the screen.
         """
         # START RENDERING PROCESS
+        self.clear()
         arcade.start_render()
 
         # DRAW ALL SPRITES
@@ -184,13 +260,13 @@ class MyGame(arcade.Window):
         # PLAYER MOVES WITH ARROW KEYS
         if key in MOVEMENT_KEYS:
             if key == arcade.key.LEFT:
-                self.player_sprite.change_x = -5  # move left
+                self.player_sprite.change_x = -PLAYER_SPEED  # move left
             elif key == arcade.key.RIGHT:
-                self.player_sprite.change_x = 5  # move right
+                self.player_sprite.change_x = PLAYER_SPEED  # move right
             elif key == arcade.key.UP:
-                self.player_sprite.change_y = 5  # move up
+                self.player_sprite.change_y = PLAYER_SPEED  # move up
             elif key == arcade.key.DOWN:
-                self.player_sprite.change_y = -5  # move down
+                self.player_sprite.change_y = -PLAYER_SPEED  # move down
 
         # SHOOT BULLETS WITH A,S,D,W KEYS
         elif key in BULLET_SHOOTING_KEYS:
@@ -222,7 +298,6 @@ class MyGame(arcade.Window):
         self.update_boids(self.positions, self.velocities)
 
         for i, coin in enumerate(self.coin_list):
-
             # Position the coin
             coin.center_x = self.positions[0][i]
             coin.center_y = self.positions[1][i]
@@ -233,8 +308,12 @@ class MyGame(arcade.Window):
         :param delta_time: TODO
         """
         # UPDATE PLAYER LOCATION
-        self.player_sprite.center_x += self.player_sprite.change_x
-        self.player_sprite.center_y += self.player_sprite.change_y
+        #self.player_sprite.center_x += self.player_sprite.change_x
+        #self.player_sprite.center_y += self.player_sprite.change_y
+        self.player_list.update()
+
+        # UPDATE PLAYER ANIMATION
+        self.player_list.update_animation()
 
         # ADD ALL BULLET SPRITES
         self.bullet_list.update()
@@ -257,6 +336,7 @@ class MyGame(arcade.Window):
             # REMOVE BULLET IF OFF OF SCREEN
             if bullet.bottom > self.width or bullet.top < 0 or bullet.right < 0 or bullet.left > self.width:
                 bullet.remove_from_sprite_lists()
+
 
     def shoot_bullet(self, angle):
         """
@@ -299,7 +379,7 @@ class MyGame(arcade.Window):
                 velocities[1][i] = velocities[1][i] - .5
 
 
-        move_to_middle_strength = 0.01
+        move_to_middle_strength = 0.005
         middle = np.mean(positions, 1)
         direction_to_middle = positions - middle[:, np.newaxis]
         velocities -= direction_to_middle * move_to_middle_strength
@@ -307,7 +387,7 @@ class MyGame(arcade.Window):
         separations = positions[:, np.newaxis, :] - positions[:, :, np.newaxis]
         squared_displacements = separations * separations
         square_distances = np.sum(squared_displacements, 0)
-        alert_distance = 100
+        alert_distance = 200
         far_away = square_distances > alert_distance
         separations_if_close = np.copy(separations)
         separations_if_close[0, :, :][far_away] = 0
@@ -315,8 +395,8 @@ class MyGame(arcade.Window):
         velocities += np.sum(separations_if_close, 1)
 
         velocity_differences = velocities[:, np.newaxis, :] - velocities[:, :, np.newaxis]
-        formation_flying_distance = 10000
-        formation_flying_strength = 0.125
+        formation_flying_distance = 100000
+        formation_flying_strength = 0.075
         very_far = square_distances > formation_flying_distance
         velocity_differences_if_close = np.copy(velocity_differences)
         velocity_differences_if_close[0, :, :][very_far] = 0

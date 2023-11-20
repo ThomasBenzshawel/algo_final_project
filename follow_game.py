@@ -12,7 +12,7 @@ SCREEN_HEIGHT = 600
 SCREEN_TITLE = "Sprite Follow Player Simple Example"
 
 CHARACTER_SPRITE_SPEED = 5
-COIN_SPRITE_SPEED = 0.5
+COIN_SPRITE_SPEED = 3
 
 
 class Coin(arcade.Sprite):
