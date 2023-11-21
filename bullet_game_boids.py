@@ -35,6 +35,7 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 SCREEN_TITLE = "Sprites, Bullets and boids Example"
 window = None
+COLLISION_THRESHOLD = 10
 
 # SET SPEED VALUES
 PLAYER_SPEED = 5
@@ -335,46 +336,63 @@ class MyGame(arcade.Window):
         buildings1 = arcade.Sprite("images/black.png", 1)
         buildings1.center_x = 120
         buildings1.center_y = 315
+        buildings1.set_hit_box([(0, 350), (225, 350), (225, 275), (0, 275)])
 
         buildings2 = arcade.Sprite("images/black.png", 2)
         buildings2.center_x = 600
         buildings2.center_y = 500
+        buildings2.set_hit_box([(375, 585), (800, 585), (800, 425), (375, 425)])
+
 
         buildings3 = arcade.Sprite("images/black1.png", 1.25)
         buildings3.center_x = 150
         buildings3.center_y = 500
+        buildings3.set_hit_box([(75, 550), (225, 550), (225, 450), (75, 450)])
 
         buildings4 = arcade.Sprite("images/black1.png", .75)
         buildings4.center_x = 410
         buildings4.center_y = 295
+        buildings4.set_hit_box([(365, 325), (455, 325), (455, 268), (365, 268)])
 
         buildings5 = arcade.Sprite("images/black1.png", 1.25)
         buildings5.center_x = 125
         buildings5.center_y = 150
+        buildings5.set_hit_box([(50, 200), (200, 200), (200, 100), (50, 100)])
 
         trees1 = arcade.Sprite("images/black1.png", 3)
         trees1.center_x = 700
         trees1.center_y = 85
+        trees1.set_hit_box([(520, 200), (800, 200), (800, 0), (520, 0)])
 
         trees2 = arcade.Sprite("images/black.png", 4)
         trees2.center_x = 300
         trees2.center_y = -55
+        trees2.set_hit_box([(0, 100), (800, 100), (800, 0), (0, 0)])
 
         trees3 = arcade.Sprite("images/black.png", 4)
         trees3.center_x = 360
         trees3.center_y = 700
+        trees3.set_hit_box([(0, 600), (800, 600), (800, 550), (0, 550)])
 
         trees4 = arcade.Sprite("images/black1.png", 2)
         trees4.center_x = 800
         trees4.center_y = 450
+        trees4.set_hit_box([(675, 600), (800, 600), (800, 375), (675, 375)])
 
         trees5 = arcade.Sprite("images/black1.png", 2)
         trees5.center_x = 850
         trees5.center_y = 325
+        trees5.set_hit_box([(725, 800), (600, 800), (600, 250), (725, 250)])
+
+        # TESTER
+        # dot = arcade.Sprite("images/dot.png", .01)
+        # dot.center_x = 100
+        # dot.center_y = 600
 
         trees6 = arcade.Sprite("images/black1.png", 6)
         trees6.center_x = -275
         trees6.center_y = 325
+        trees6.set_hit_box([(0, 600), (100, 600), (100, 0), (0, 0)])
 
         # ADD UNMOVABLE AREAS
         self.scene_list.append(buildings1)
@@ -388,6 +406,7 @@ class MyGame(arcade.Window):
         self.scene_list.append(trees4)
         self.scene_list.append(trees5)
         self.scene_list.append(trees6)
+        # self.scene_list.append(dot)
 
     def on_draw(self):
         """
@@ -407,6 +426,7 @@ class MyGame(arcade.Window):
         self.bullet_list.draw()
         self.player_list.draw()
         self.bar_list.draw()
+        #self.scene_list.draw()
 
         # PUT SCORE ON THE SCREEN
         output = f"Score: {self.score}"
@@ -452,48 +472,45 @@ class MyGame(arcade.Window):
         :param key: The key that was pressed on the keyboard.
         :param modifiers: TODO
         """
-        # Save the current position in case of collision
-        old_x = self.player_sprite.center_x
-        old_y = self.player_sprite.center_y
-
         # PLAYER MOVES WITH ARROW KEYS
         if key in MOVEMENT_KEYS:
-            if key == arcade.key.LEFT:
-                next_pos = self.player_sprite.center_x - PLAYER_SPEED
-                # Check for collision with scene_list
-                if not any(sprite.collides_with_point((next_pos, self.player_sprite.center_y)) for sprite in self.scene_list):
-                    self.player_sprite.change_x = -PLAYER_SPEED  # move left
-                else:
-                    # If there is a collision, revert the position change
-                    self.player_sprite.center_x = old_x
-                    self.player_sprite.center_y = old_y
-            elif key == arcade.key.RIGHT:
-                next_pos = self.player_sprite.center_x + PLAYER_SPEED
-                # Check for collision with scene_list
-                if not any(sprite.collides_with_point((next_pos, self.player_sprite.center_y)) for sprite in self.scene_list):
-                    self.player_sprite.change_x = PLAYER_SPEED  # move right
-                else:
-                    # If there is a collision, revert the position change
-                    self.player_sprite.center_x = old_x
-                    self.player_sprite.center_y = old_y
-            elif key == arcade.key.UP:
-                next_pos = self.player_sprite.center_y + PLAYER_SPEED
-                # Check for collision with scene_list
-                if not any(sprite.collides_with_point((self.player_sprite.center_x, next_pos)) for sprite in self.scene_list):
-                    self.player_sprite.change_y = PLAYER_SPEED  # move up
-                else:
-                    # If there is a collision, revert the position change
-                    self.player_sprite.center_x = old_x
-                    self.player_sprite.center_y = old_y
-            elif key == arcade.key.DOWN:
-                next_pos = self.player_sprite.center_y - PLAYER_SPEED
-                # Check for collision with scene_list
-                if not any(sprite.collides_with_point((self.player_sprite.center_x, next_pos)) for sprite in self.scene_list):
-                    self.player_sprite.change_y = -PLAYER_SPEED  # move down
-                else:
-                    # If there is a collision, revert the position change
-                    self.player_sprite.center_x = old_x
-                    self.player_sprite.center_y = old_y
+            l_valid = False
+            r_valid = False
+            d_valid = False
+            u_valid = False
+
+            # CHECK IF PLAYER CAN MOVE LEFT
+            next_l_pos = self.player_sprite.center_x - PLAYER_SPEED
+            if not any(sprite.collides_with_point((next_l_pos, self.player_sprite.center_y)) for sprite in self.scene_list):
+                l_valid = True
+
+            # CHECK IF PLAYER CAN MOVE RIGHT
+            next_r_pos = self.player_sprite.center_x + PLAYER_SPEED
+            if not any(sprite.collides_with_point((next_r_pos, self.player_sprite.center_y)) for sprite in self.scene_list):
+                r_valid = True
+
+            # CHECK IF PLAYER CAN MOVE DOWN
+            next_d_pos = self.player_sprite.center_y - PLAYER_SPEED
+            if not any(sprite.collides_with_point((self.player_sprite.center_x, next_d_pos)) for sprite in self.scene_list):
+                d_valid = True
+
+            # CHECK IF PLAYER CAN MOVE UP
+            next_u_pos = self.player_sprite.center_y + PLAYER_SPEED
+
+            if not any(sprite.collides_with_point((self.player_sprite.center_x, next_u_pos)) for sprite in self.scene_list):
+                u_valid = True
+
+            if key == arcade.key.LEFT and l_valid:
+                self.player_sprite.change_x = -PLAYER_SPEED  # move left
+
+            elif key == arcade.key.RIGHT and r_valid:
+                self.player_sprite.change_x = PLAYER_SPEED
+
+            elif key == arcade.key.UP and u_valid:
+                self.player_sprite.change_y = PLAYER_SPEED  # move up
+
+            elif key == arcade.key.DOWN and d_valid:
+                self.player_sprite.change_y = -PLAYER_SPEED  # move down
 
         # SHOOT BULLETS WITH A,S,D,W KEYS
         elif key in BULLET_SHOOTING_KEYS:
@@ -540,7 +557,7 @@ class MyGame(arcade.Window):
         # self.player_sprite.center_y += self.player_sprite.change_y
         self.player_list.update()
         self.player_sprite.health_bar.position = (self.player_sprite.center_x,
-                                                     self.player_sprite.center_y + HEALTH_BAR_OFFSET,)
+                                                  self.player_sprite.center_y + HEALTH_BAR_OFFSET,)
 
         # UPDATE PLAYER ANIMATION
         self.player_list.update_animation()
