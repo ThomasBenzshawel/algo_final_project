@@ -272,6 +272,9 @@ class MyGame(arcade.Window):
         self.bullet_list = None
         self.scene_list = None
 
+        # MOVEMENT KEY
+        self.current_key = None
+
         # BOID INFO
         self.positions = None
         self.velocities = None
@@ -342,7 +345,6 @@ class MyGame(arcade.Window):
         buildings2.center_x = 600
         buildings2.center_y = 500
         buildings2.set_hit_box([(375, 585), (800, 585), (800, 425), (375, 425)])
-
 
         buildings3 = arcade.Sprite("images/black1.png", 1.25)
         buildings3.center_x = 150
@@ -472,45 +474,19 @@ class MyGame(arcade.Window):
         :param key: The key that was pressed on the keyboard.
         :param modifiers: TODO
         """
-        # PLAYER MOVES WITH ARROW KEYS
+        # Check if the pressed key is an arrow key
         if key in MOVEMENT_KEYS:
-            l_valid = False
-            r_valid = False
-            d_valid = False
-            u_valid = False
+            self.current_key = key
 
-            # CHECK IF PLAYER CAN MOVE LEFT
-            next_l_pos = self.player_sprite.center_x - PLAYER_SPEED
-            if not any(sprite.collides_with_point((next_l_pos, self.player_sprite.center_y)) for sprite in self.scene_list):
-                l_valid = True
-
-            # CHECK IF PLAYER CAN MOVE RIGHT
-            next_r_pos = self.player_sprite.center_x + PLAYER_SPEED
-            if not any(sprite.collides_with_point((next_r_pos, self.player_sprite.center_y)) for sprite in self.scene_list):
-                r_valid = True
-
-            # CHECK IF PLAYER CAN MOVE DOWN
-            next_d_pos = self.player_sprite.center_y - PLAYER_SPEED
-            if not any(sprite.collides_with_point((self.player_sprite.center_x, next_d_pos)) for sprite in self.scene_list):
-                d_valid = True
-
-            # CHECK IF PLAYER CAN MOVE UP
-            next_u_pos = self.player_sprite.center_y + PLAYER_SPEED
-
-            if not any(sprite.collides_with_point((self.player_sprite.center_x, next_u_pos)) for sprite in self.scene_list):
-                u_valid = True
-
-            if key == arcade.key.LEFT and l_valid:
-                self.player_sprite.change_x = -PLAYER_SPEED  # move left
-
-            elif key == arcade.key.RIGHT and r_valid:
-                self.player_sprite.change_x = PLAYER_SPEED
-
-            elif key == arcade.key.UP and u_valid:
-                self.player_sprite.change_y = PLAYER_SPEED  # move up
-
-            elif key == arcade.key.DOWN and d_valid:
-                self.player_sprite.change_y = -PLAYER_SPEED  # move down
+            # Schedule the movement update function to run continuously
+            if key == arcade.key.LEFT:
+                arcade.schedule(self.check_and_move, 1 / 60)
+            elif key == arcade.key.RIGHT:
+                arcade.schedule(self.check_and_move, 1 / 60)
+            elif key == arcade.key.UP:
+                arcade.schedule(self.check_and_move, 1 / 60)
+            elif key == arcade.key.DOWN:
+                arcade.schedule(self.check_and_move, 1 / 60)
 
         # SHOOT BULLETS WITH A,S,D,W KEYS
         elif key in BULLET_SHOOTING_KEYS:
@@ -523,7 +499,6 @@ class MyGame(arcade.Window):
             elif key == arcade.key.S:
                 self.shoot_bullet(-90)  # shoot down
 
-
     def on_key_release(self, key, modifiers):
         """
         Called whenever a key is released. Perform the corresponding actions.
@@ -532,11 +507,42 @@ class MyGame(arcade.Window):
         :param key: The key that was pressed on the keyboard.
         :param modifiers: TODO
         """
-        # STOP PLAYER MOVEMENT
-        if key in [arcade.key.LEFT, arcade.key.RIGHT]:
-            self.player_sprite.change_x = 0  # stop moving horizontally
-        elif key in [arcade.key.UP, arcade.key.DOWN]:
-            self.player_sprite.change_y = 0  # stop moving vertically
+        # Stop the scheduled movement update function when the key is released
+        if key in MOVEMENT_KEYS:
+            self.current_key = None
+            arcade.unschedule(self.check_and_move)
+
+    def check_and_move(self, delta_time):
+        """
+        Function to check for collisions and move the sprite continuously.
+
+        :param delta_time: Time since the last update.
+        """
+        l_valid = False
+        r_valid = False
+        d_valid = False
+        u_valid = False
+
+        # Calculate the next position based on the current movement direction
+        if self.current_key == arcade.key.LEFT:
+            next_pos = (self.player_sprite.center_x - PLAYER_SPEED, self.player_sprite.center_y)
+        elif self.current_key == arcade.key.RIGHT:
+            next_pos = (self.player_sprite.center_x + PLAYER_SPEED, self.player_sprite.center_y)
+        elif self.current_key == arcade.key.DOWN:
+            next_pos = (self.player_sprite.center_x, self.player_sprite.center_y - PLAYER_SPEED)
+        elif self.current_key == arcade.key.UP:
+            next_pos = (self.player_sprite.center_x, self.player_sprite.center_y + PLAYER_SPEED)
+
+        # Check if the next position is valid (no collisions)
+        if not any(sprite.collides_with_point(next_pos) for sprite in self.scene_list):
+            if self.current_key == arcade.key.LEFT and l_valid:
+                self.player_sprite.change_x = -PLAYER_SPEED  # move left
+            elif self.current_key == arcade.key.RIGHT and r_valid:
+                self.player_sprite.change_x = PLAYER_SPEED
+            elif self.current_key == arcade.key.DOWN and d_valid:
+                self.player_sprite.change_y = -PLAYER_SPEED  # move down
+            elif self.current_key == arcade.key.UP and u_valid:
+                self.player_sprite.change_y = PLAYER_SPEED  # move up
 
     def on_update(self, delta_time):
 
