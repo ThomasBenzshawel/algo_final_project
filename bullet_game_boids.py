@@ -269,7 +269,7 @@ class MyGame(arcade.Window):
         self.player_list = None
         self.coin_list = None
         self.bullet_list = None
-        self.tree_list = None
+        self.scene_list = None
 
         # BOID INFO
         self.positions = None
@@ -294,22 +294,22 @@ class MyGame(arcade.Window):
         Set up the game and initialize the variables.
         """
         # SET BACKGROUND
-        self.background = arcade.load_texture("images/grass.png")
+        self.background = arcade.load_texture("images/background.png")
 
         # SPRITE LISTS
         self.bar_list = arcade.SpriteList()
         self.player_list = arcade.SpriteList()
         self.coin_list = arcade.SpriteList()
         self.bullet_list = arcade.SpriteList()
-        self.tree_list = arcade.SpriteList()
+        self.scene_list = arcade.SpriteList()
 
         # RESET SCORE
         self.score = 0
 
         # Image from kenney.nl "
         self.player_sprite = PlayerCharacter(self.bar_list)
-        self.player_sprite.center_x = 50
-        self.player_sprite.center_y = 70
+        self.player_sprite.center_x = 225
+        self.player_sprite.center_y = 150
         self.player_list.append(self.player_sprite)
 
         # RANDOM POSITIONS FOR BOIDS
@@ -331,17 +331,63 @@ class MyGame(arcade.Window):
             # Add the coin to the lists
             self.coin_list.append(coin)
 
-        # TODO PLACE TREES
-        for i in range(0, 10):
-            tree = arcade.Sprite("images/tree.png", .75)
+        # STORE WHERE ITEMS ARE ON SCREEN
+        buildings1 = arcade.Sprite("images/black.png", 1)
+        buildings1.center_x = 120
+        buildings1.center_y = 315
 
-            # Position the coin
-            tree.center_x = self.positions[0][i]
-            tree.center_y = self.positions[1][i]
+        buildings2 = arcade.Sprite("images/black.png", 2)
+        buildings2.center_x = 600
+        buildings2.center_y = 500
 
-            # Add the coin to the lists
-            self.tree_list.append(tree)
+        buildings3 = arcade.Sprite("images/black1.png", 1.25)
+        buildings3.center_x = 150
+        buildings3.center_y = 500
 
+        buildings4 = arcade.Sprite("images/black1.png", .75)
+        buildings4.center_x = 410
+        buildings4.center_y = 295
+
+        buildings5 = arcade.Sprite("images/black1.png", 1.25)
+        buildings5.center_x = 125
+        buildings5.center_y = 150
+
+        trees1 = arcade.Sprite("images/black1.png", 3)
+        trees1.center_x = 700
+        trees1.center_y = 85
+
+        trees2 = arcade.Sprite("images/black.png", 4)
+        trees2.center_x = 300
+        trees2.center_y = -55
+
+        trees3 = arcade.Sprite("images/black.png", 4)
+        trees3.center_x = 360
+        trees3.center_y = 700
+
+        trees4 = arcade.Sprite("images/black1.png", 2)
+        trees4.center_x = 800
+        trees4.center_y = 450
+
+        trees5 = arcade.Sprite("images/black1.png", 2)
+        trees5.center_x = 850
+        trees5.center_y = 325
+
+        trees6 = arcade.Sprite("images/black1.png", 6)
+        trees6.center_x = -275
+        trees6.center_y = 325
+
+        # ADD UNMOVABLE AREAS
+        self.scene_list.append(buildings1)
+        self.scene_list.append(buildings2)
+        self.scene_list.append(buildings3)
+        self.scene_list.append(buildings4)
+        self.scene_list.append(buildings5)
+        self.scene_list.append(trees1)
+        self.scene_list.append(trees2)
+        self.scene_list.append(trees3)
+        self.scene_list.append(trees4)
+        self.scene_list.append(trees5)
+        self.scene_list.append(trees6)
 
     def on_draw(self):
         """
@@ -361,7 +407,6 @@ class MyGame(arcade.Window):
         self.bullet_list.draw()
         self.player_list.draw()
         self.bar_list.draw()
-        self.tree_list.draw()
 
         # PUT SCORE ON THE SCREEN
         output = f"Score: {self.score}"
@@ -407,16 +452,48 @@ class MyGame(arcade.Window):
         :param key: The key that was pressed on the keyboard.
         :param modifiers: TODO
         """
+        # Save the current position in case of collision
+        old_x = self.player_sprite.center_x
+        old_y = self.player_sprite.center_y
+
         # PLAYER MOVES WITH ARROW KEYS
         if key in MOVEMENT_KEYS:
             if key == arcade.key.LEFT:
-                self.player_sprite.change_x = -PLAYER_SPEED  # move left
+                next_pos = self.player_sprite.center_x - PLAYER_SPEED
+                # Check for collision with scene_list
+                if not any(sprite.collides_with_point((next_pos, self.player_sprite.center_y)) for sprite in self.scene_list):
+                    self.player_sprite.change_x = -PLAYER_SPEED  # move left
+                else:
+                    # If there is a collision, revert the position change
+                    self.player_sprite.center_x = old_x
+                    self.player_sprite.center_y = old_y
             elif key == arcade.key.RIGHT:
-                self.player_sprite.change_x = PLAYER_SPEED  # move right
+                next_pos = self.player_sprite.center_x + PLAYER_SPEED
+                # Check for collision with scene_list
+                if not any(sprite.collides_with_point((next_pos, self.player_sprite.center_y)) for sprite in self.scene_list):
+                    self.player_sprite.change_x = PLAYER_SPEED  # move right
+                else:
+                    # If there is a collision, revert the position change
+                    self.player_sprite.center_x = old_x
+                    self.player_sprite.center_y = old_y
             elif key == arcade.key.UP:
-                self.player_sprite.change_y = PLAYER_SPEED  # move up
+                next_pos = self.player_sprite.center_y + PLAYER_SPEED
+                # Check for collision with scene_list
+                if not any(sprite.collides_with_point((self.player_sprite.center_x, next_pos)) for sprite in self.scene_list):
+                    self.player_sprite.change_y = PLAYER_SPEED  # move up
+                else:
+                    # If there is a collision, revert the position change
+                    self.player_sprite.center_x = old_x
+                    self.player_sprite.center_y = old_y
             elif key == arcade.key.DOWN:
-                self.player_sprite.change_y = -PLAYER_SPEED  # move down
+                next_pos = self.player_sprite.center_y - PLAYER_SPEED
+                # Check for collision with scene_list
+                if not any(sprite.collides_with_point((self.player_sprite.center_x, next_pos)) for sprite in self.scene_list):
+                    self.player_sprite.change_y = -PLAYER_SPEED  # move down
+                else:
+                    # If there is a collision, revert the position change
+                    self.player_sprite.center_x = old_x
+                    self.player_sprite.center_y = old_y
 
         # SHOOT BULLETS WITH A,S,D,W KEYS
         elif key in BULLET_SHOOTING_KEYS:
@@ -428,6 +505,7 @@ class MyGame(arcade.Window):
                 self.shoot_bullet(90)  # shoot up
             elif key == arcade.key.S:
                 self.shoot_bullet(-90)  # shoot down
+
 
     def on_key_release(self, key, modifiers):
         """
@@ -499,7 +577,7 @@ class MyGame(arcade.Window):
 
                 # CHECK IF PLAYER IS DEAD, IF NOT UPDATE HEALTH BAR
                 if self.player_sprite.health <= 0:
-                    arcade.exit()
+                    # arcade.exit()
                     self.player_sprite.health_bar.fullness = (0 / PLAYER_HEALTH)
                 else:
                     self.player_sprite.health_bar.fullness = (self.player_sprite.health / PLAYER_HEALTH)
