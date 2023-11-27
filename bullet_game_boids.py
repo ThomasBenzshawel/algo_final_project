@@ -23,7 +23,6 @@ SPRITE_SCALING_COIN = 0.02
 SPRITE_SCALING_LASER = 0.8
 TILE_SCALING = 1
 
-
 # SET ENEMY COUNT
 COIN_COUNT = 50
 
@@ -547,24 +546,13 @@ class MyGame(arcade.Window):
 
         # Calculate the next position based on the current movement direction
         if self.current_key == arcade.key.LEFT:
-            next_pos = (self.player_sprite.center_x - PLAYER_SPEED, self.player_sprite.center_y)
+            self.player_sprite.change_x = -PLAYER_SPEED  # move left
         elif self.current_key == arcade.key.RIGHT:
-            next_pos = (self.player_sprite.center_x + PLAYER_SPEED, self.player_sprite.center_y)
+            self.player_sprite.change_x = PLAYER_SPEED
         elif self.current_key == arcade.key.DOWN:
-            next_pos = (self.player_sprite.center_x, self.player_sprite.center_y - PLAYER_SPEED)
+            self.player_sprite.change_y = -PLAYER_SPEED  # move down
         elif self.current_key == arcade.key.UP:
-            next_pos = (self.player_sprite.center_x, self.player_sprite.center_y + PLAYER_SPEED)
-
-        # Check if the next position is valid (no collisions)
-        if not any(sprite.collides_with_point(next_pos) for sprite in self.scene_list):
-            if self.current_key == arcade.key.LEFT and l_valid:
-                self.player_sprite.change_x = -PLAYER_SPEED  # move left
-            elif self.current_key == arcade.key.RIGHT and r_valid:
-                self.player_sprite.change_x = PLAYER_SPEED
-            elif self.current_key == arcade.key.DOWN and d_valid:
-                self.player_sprite.change_y = -PLAYER_SPEED  # move down
-            elif self.current_key == arcade.key.UP and u_valid:
-                self.player_sprite.change_y = PLAYER_SPEED  # move up
+            self.player_sprite.change_y = PLAYER_SPEED  # move up
 
     def on_update(self, delta_time):
 
@@ -576,9 +564,7 @@ class MyGame(arcade.Window):
             coin.center_y = self.positions[1][i]
 
         # UPDATE PLAYER LOCATION
-        self.player_sprite.center_x += self.player_sprite.change_x
-        self.player_sprite.center_y += self.player_sprite.change_y
-        #self.player_list.update()
+        self.player_list.update()
         self.player_sprite.health_bar.position = (self.player_sprite.center_x,
                                                   self.player_sprite.center_y + HEALTH_BAR_OFFSET,)
 
