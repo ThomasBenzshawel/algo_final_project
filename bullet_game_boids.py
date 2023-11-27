@@ -295,30 +295,80 @@ class MyGame(arcade.Window):
         self.scene = None
         self.my_map = None
         self.physics_engine = None
-        # arcade.set_background_color(arcade.color.AMAZON)
-        # self.background = None
 
     def setup(self):
         """
         Set up the game and initialize the variables.
         """
-        # # SET BACKGROUND
-        # layer_options = {
-        #     "Plants" : {"use_spacial_hash" : True},
-        #     "Buildings" : {"use_spacial_hash" : True}
-        # }
-        # self.my_map = tile_map.load_tilemap("maps/map.json", scaling = 2.5, use_spatial_hash = True)
-        # self.scene = arcade.Scene.from_tilemap(self.my_map)
-        layer_options = {"Buildings": { "use_spatial_hash": True,},}
+        layer_options = {
+            "Buildings": {
+                "use_spatial_hash": True,
+            },
+            "Plants": {
+                "use_spatial_hash": True,
+            },
+            "TreeR1": {
+                "use_spatial_hash": True,
+            },
+            "TreeR2": {
+                "use_spatial_hash": True,
+            },
+            "TreeR3": {
+                "use_spatial_hash": True,
+            },
+            "TreeR4": {
+                "use_spatial_hash": True,
+            },
+            "TreeR5": {
+                "use_spatial_hash": True,
+            },
+            "TreeR6": {
+                "use_spatial_hash": True,
+            },
+            "TreeR7": {
+                "use_spatial_hash": True,
+            },
+            "TreeR8": {
+                "use_spatial_hash": True,
+            },
+            "TreeR9": {
+                "use_spatial_hash": True,
+            },
+            "TreeR10": {
+                "use_spatial_hash": True,
+            },
+            "TreeR11": {
+                "use_spatial_hash": True,
+            },
+            "TreeR12": {
+                "use_spatial_hash": True,
+            },
+            "TreeR13": {
+                "use_spatial_hash": True,
+            },
+            "TreeR14": {
+                "use_spatial_hash": True,
+            },
+            "TreeR15": {
+                "use_spatial_hash": True,
+            },
+            "TreeR816": {
+                "use_spatial_hash": True,
+            },
+            "TreeR17": {
+                "use_spatial_hash": True,
+            },
+            "TreeR818": {
+                "use_spatial_hash": True,
+            },
+        }
 
         self.tile_map = arcade.load_tilemap("maps/map.tmj", TILE_SCALING, layer_options)
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(
-            self.player_sprite, gravity_constant = 2, walls = self.scene["Buildings"]
+            self.player_sprite, gravity_constant=2, walls=self.scene["Buildings"]
         )
-
-        # self.background = arcade.load_texture("images/background.png")
 
         # SPRITE LISTS
         self.bar_list = arcade.SpriteList()
@@ -344,8 +394,6 @@ class MyGame(arcade.Window):
         # Create the coins
         for i in range(len(self.positions[0])):
             # Create the coin instance
-            # Coin image from kenney.nl
-            # coin = arcade.Sprite(":resources:images/items/coinGold.png", SPRITE_SCALING_COIN)
             coin = arcade.Sprite("images/bird.gif", SPRITE_SCALING_COIN)
 
             # Position the coin
@@ -356,79 +404,79 @@ class MyGame(arcade.Window):
             self.coin_list.append(coin)
 
         # STORE WHERE ITEMS ARE ON SCREEN
-        buildings1 = arcade.Sprite("images/black.png", 1)
-        buildings1.center_x = 120
-        buildings1.center_y = 315
-        buildings1.set_hit_box([(0, 350), (225, 350), (225, 275), (0, 275)])
+        # buildings1 = arcade.Sprite("images/black.png", 1)
+        # buildings1.center_x = 120
+        # buildings1.center_y = 315
+        # buildings1.set_hit_box([(0, 350), (225, 350), (225, 275), (0, 275)])
+        #
+        # buildings2 = arcade.Sprite("images/black.png", 2)
+        # buildings2.center_x = 600
+        # buildings2.center_y = 500
+        # buildings2.set_hit_box([(375, 585), (800, 585), (800, 425), (375, 425)])
+        #
+        # buildings3 = arcade.Sprite("images/black1.png", 1.25)
+        # buildings3.center_x = 150
+        # buildings3.center_y = 500
+        # buildings3.set_hit_box([(75, 550), (225, 550), (225, 450), (75, 450)])
+        #
+        # buildings4 = arcade.Sprite("images/black1.png", .75)
+        # buildings4.center_x = 410
+        # buildings4.center_y = 295
+        # buildings4.set_hit_box([(365, 325), (455, 325), (455, 268), (365, 268)])
+        #
+        # buildings5 = arcade.Sprite("images/black1.png", 1.25)
+        # buildings5.center_x = 125
+        # buildings5.center_y = 150
+        # buildings5.set_hit_box([(50, 200), (200, 200), (200, 100), (50, 100)])
+        #
+        # trees1 = arcade.Sprite("images/black1.png", 3)
+        # trees1.center_x = 700
+        # trees1.center_y = 85
+        # trees1.set_hit_box([(520, 200), (800, 200), (800, 0), (520, 0)])
+        #
+        # trees2 = arcade.Sprite("images/black.png", 4)
+        # trees2.center_x = 300
+        # trees2.center_y = -55
+        # trees2.set_hit_box([(0, 100), (800, 100), (800, 0), (0, 0)])
 
-        buildings2 = arcade.Sprite("images/black.png", 2)
-        buildings2.center_x = 600
-        buildings2.center_y = 500
-        buildings2.set_hit_box([(375, 585), (800, 585), (800, 425), (375, 425)])
-
-        buildings3 = arcade.Sprite("images/black1.png", 1.25)
-        buildings3.center_x = 150
-        buildings3.center_y = 500
-        buildings3.set_hit_box([(75, 550), (225, 550), (225, 450), (75, 450)])
-
-        buildings4 = arcade.Sprite("images/black1.png", .75)
-        buildings4.center_x = 410
-        buildings4.center_y = 295
-        buildings4.set_hit_box([(365, 325), (455, 325), (455, 268), (365, 268)])
-
-        buildings5 = arcade.Sprite("images/black1.png", 1.25)
-        buildings5.center_x = 125
-        buildings5.center_y = 150
-        buildings5.set_hit_box([(50, 200), (200, 200), (200, 100), (50, 100)])
-
-        trees1 = arcade.Sprite("images/black1.png", 3)
-        trees1.center_x = 700
-        trees1.center_y = 85
-        trees1.set_hit_box([(520, 200), (800, 200), (800, 0), (520, 0)])
-
-        trees2 = arcade.Sprite("images/black.png", 4)
-        trees2.center_x = 300
-        trees2.center_y = -55
-        trees2.set_hit_box([(0, 100), (800, 100), (800, 0), (0, 0)])
-
-        trees3 = arcade.Sprite("images/black.png", 4)
-        trees3.center_x = 360
-        trees3.center_y = 700
-        trees3.set_hit_box([(0, 600), (800, 600), (800, 550), (0, 550)])
-
-        trees4 = arcade.Sprite("images/black1.png", 2)
-        trees4.center_x = 800
-        trees4.center_y = 450
-        trees4.set_hit_box([(675, 600), (800, 600), (800, 375), (675, 375)])
-
-        trees5 = arcade.Sprite("images/black1.png", 2)
-        trees5.center_x = 850
-        trees5.center_y = 325
-        trees5.set_hit_box([(725, 800), (600, 800), (600, 250), (725, 250)])
+        # trees3 = arcade.Sprite("images/black.png", 4)
+        # trees3.center_x = 360
+        # trees3.center_y = 700
+        # trees3.set_hit_box([(0, 600), (800, 600), (800, 550), (0, 550)])
+        #
+        # trees4 = arcade.Sprite("images/black1.png", 2)
+        # trees4.center_x = 800
+        # trees4.center_y = 450
+        # trees4.set_hit_box([(675, 600), (800, 600), (800, 375), (675, 375)])
+        #
+        # trees5 = arcade.Sprite("images/black1.png", 2)
+        # trees5.center_x = 850
+        # trees5.center_y = 325
+        # trees5.set_hit_box([(725, 800), (600, 800), (600, 250), (725, 250)])
 
         # TESTER
         # dot = arcade.Sprite("images/dot.png", .01)
         # dot.center_x = 100
         # dot.center_y = 600
 
-        trees6 = arcade.Sprite("images/black1.png", 6)
-        trees6.center_x = -275
-        trees6.center_y = 325
-        trees6.set_hit_box([(0, 600), (100, 600), (100, 0), (0, 0)])
+        # trees6 = arcade.Sprite("images/black1.png", 6)
+        # trees6.center_x = -275
+        # trees6.center_y = 325
+        # trees6.set_hit_box([(0, 600), (100, 600), (100, 0), (0, 0)])
 
         # ADD UNMOVABLE AREAS
-        self.scene_list.append(buildings1)
-        self.scene_list.append(buildings2)
-        self.scene_list.append(buildings3)
-        self.scene_list.append(buildings4)
-        self.scene_list.append(buildings5)
-        self.scene_list.append(trees1)
-        self.scene_list.append(trees2)
-        self.scene_list.append(trees3)
-        self.scene_list.append(trees4)
-        self.scene_list.append(trees5)
-        self.scene_list.append(trees6)
-        # self.scene_list.append(dot)
+        # self.scene_list.append(buildings1)
+        # self.scene_list.append(buildings2)
+        # self.scene_list.append(buildings3)
+        # self.scene_list.append(buildings4)
+        # self.scene_list.append(buildings5)
+        # self.scene_list.append(trees1)
+        # self.scene_list.append(trees2)
+        # self.scene_list.append(trees3)
+        # self.scene_list.append(trees4)
+        # self.scene_list.append(trees5)
+        # self.scene_list.append(trees6)
+        # # self.scene_list.append(dot)
 
     def on_draw(self):
         """
@@ -440,16 +488,13 @@ class MyGame(arcade.Window):
 
         # DRAW BACKGROUND
         self.scene.draw()
-        # arcade.draw_lrwh_rectangle_textured(0, 0,
-        #                                     SCREEN_WIDTH, SCREEN_HEIGHT,
-        #                                     self.background)
 
         # DRAW ALL SPRITES
         self.coin_list.draw()
         self.bullet_list.draw()
         self.player_list.draw()
         self.bar_list.draw()
-        #self.scene_list.draw()
+        # self.scene_list.draw()
 
         # PUT SCORE ON THE SCREEN
         output = f"Score: {self.score}"
@@ -491,23 +536,18 @@ class MyGame(arcade.Window):
         """
         Called whenever a key is pressed. Perform the corresponding actions.
 
-        :param self: TODO
         :param key: The key that was pressed on the keyboard.
-        :param modifiers: TODO
         """
         # Check if the pressed key is an arrow key
         if key in MOVEMENT_KEYS:
-            self.current_key = key
-
-            # Schedule the movement update function to run continuously
             if key == arcade.key.LEFT:
-                arcade.schedule(self.check_and_move, 1 / 60)
+                self.player_sprite.change_x = -PLAYER_SPEED  # move left
             elif key == arcade.key.RIGHT:
-                arcade.schedule(self.check_and_move, 1 / 60)
-            elif key == arcade.key.UP:
-                arcade.schedule(self.check_and_move, 1 / 60)
+                self.player_sprite.change_x = PLAYER_SPEED # move right
             elif key == arcade.key.DOWN:
-                arcade.schedule(self.check_and_move, 1 / 60)
+                self.player_sprite.change_y = -PLAYER_SPEED  # move down
+            elif key == arcade.key.UP:
+                self.player_sprite.change_y = PLAYER_SPEED  # move up
 
         # SHOOT BULLETS WITH A,S,D,W KEYS
         elif key in BULLET_SHOOTING_KEYS:
@@ -529,30 +569,10 @@ class MyGame(arcade.Window):
         :param modifiers: TODO
         """
         # Stop the scheduled movement update function when the key is released
-        if key in MOVEMENT_KEYS:
-            self.current_key = None
-            arcade.unschedule(self.check_and_move)
-
-    def check_and_move(self, delta_time):
-        """
-        Function to check for collisions and move the sprite continuously.
-
-        :param delta_time: Time since the last update.
-        """
-        l_valid = False
-        r_valid = False
-        d_valid = False
-        u_valid = False
-
-        # Calculate the next position based on the current movement direction
-        if self.current_key == arcade.key.LEFT:
-            self.player_sprite.change_x = -PLAYER_SPEED  # move left
-        elif self.current_key == arcade.key.RIGHT:
-            self.player_sprite.change_x = PLAYER_SPEED
-        elif self.current_key == arcade.key.DOWN:
-            self.player_sprite.change_y = -PLAYER_SPEED  # move down
-        elif self.current_key == arcade.key.UP:
-            self.player_sprite.change_y = PLAYER_SPEED  # move up
+        if key == arcade.key.UP or key == arcade.key.DOWN:
+            self.player_sprite.change_y = 0
+        elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
+            self.player_sprite.change_x = 0
 
     def on_update(self, delta_time):
 
@@ -567,7 +587,6 @@ class MyGame(arcade.Window):
         self.player_list.update()
         self.player_sprite.health_bar.position = (self.player_sprite.center_x,
                                                   self.player_sprite.center_y + HEALTH_BAR_OFFSET,)
-
         # UPDATE PLAYER ANIMATION
         self.player_list.update_animation()
 
