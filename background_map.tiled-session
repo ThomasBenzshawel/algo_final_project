@@ -1,0 +1,102 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "",
+    "expandedProjectPaths": [
+        "map",
+        "."
+    ],
+    "file.lastUsedOpenFilter": "All Files (*)",
+    "fileStates": {
+        "map/basemap.tmx": {
+            "scale": 0.75,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 680,
+                "y": 425.99999999999994
+            }
+        },
+        "map/building1.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "map/building2.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "map/building3.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "map/building5.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "map/bush.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "map/final_path.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "map/fountain.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "map/full_grass.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "map/grass.tsx": {
+            "scaleInDock": 2,
+            "scaleInEditor": 1
+        },
+        "map/path.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "map/path1.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "map/path2.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "map/tree.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        }
+    },
+    "last.imagePath": "C:/Users/bleys/DataspellProjects/algo_final_project/images",
+    "map.height": 600,
+    "map.lastUsedFormat": "tmx",
+    "map.tileHeight": 1,
+    "map.tileWidth": 1,
+    "map.width": 800,
+    "openFiles": [
+    ],
+    "project": "background_map.tiled-project",
+    "recentFiles": [
+        "map/full_grass.tsx",
+        "map/fountain.tsx",
+        "map/building3.tsx",
+        "map/bush.tsx",
+        "map/basemap.tmx",
+        "map/building5.tsx",
+        "map/final_path.tsx",
+        "map/path2.tsx",
+        "map/path1.tsx",
+        "map/building2.tsx",
+        "map/path.tsx",
+        "map/building1.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 512,
+        "width": 512
+    }
+}

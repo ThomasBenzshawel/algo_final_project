@@ -21,6 +21,7 @@ import numpy as np
 SPRITE_SCALING_PLAYER = 0.5
 SPRITE_SCALING_COIN = 0.02
 SPRITE_SCALING_LASER = 0.8
+TILE_SCALING = 1
 
 # SET ENEMY COUNT
 COIN_COUNT = 50
@@ -290,15 +291,34 @@ class MyGame(arcade.Window):
         self.hit_sound = arcade.sound.load_sound(":resources:sounds/phaseJump1.wav")
 
         # SCENE DESIGN
+        self.tile_map = None
+        self.scene = None
+        self.my_map = None
+        self.physics_engine = None
         # arcade.set_background_color(arcade.color.AMAZON)
-        self.background = None
+        # self.background = None
 
     def setup(self):
         """
         Set up the game and initialize the variables.
         """
-        # SET BACKGROUND
-        self.background = arcade.load_texture("images/background.png")
+        # # SET BACKGROUND
+        # layer_options = {
+        #     "Plants" : {"use_spacial_hash" : True},
+        #     "Buildings" : {"use_spacial_hash" : True}
+        # }
+        # self.my_map = tile_map.load_tilemap("maps/map.json", scaling = 2.5, use_spatial_hash = True)
+        # self.scene = arcade.Scene.from_tilemap(self.my_map)
+        layer_options = {"Buildings": { "use_spatial_hash": True,},}
+
+        self.tile_map = arcade.load_tilemap("maps/map.tmj", TILE_SCALING, layer_options)
+        self.scene = arcade.Scene.from_tilemap(self.tile_map)
+
+        self.physics_engine = arcade.PhysicsEnginePlatformer(
+            self.player_sprite, gravity_constant = 2, walls = self.scene["Buildings"]
+        )
+
+        # self.background = arcade.load_texture("images/background.png")
 
         # SPRITE LISTS
         self.bar_list = arcade.SpriteList()
@@ -312,7 +332,7 @@ class MyGame(arcade.Window):
 
         # Image from kenney.nl "
         self.player_sprite = PlayerCharacter(self.bar_list)
-        self.player_sprite.center_x = 225
+        self.player_sprite.center_x = 300
         self.player_sprite.center_y = 150
         self.player_list.append(self.player_sprite)
 
@@ -419,9 +439,10 @@ class MyGame(arcade.Window):
         arcade.start_render()
 
         # DRAW BACKGROUND
-        arcade.draw_lrwh_rectangle_textured(0, 0,
-                                            SCREEN_WIDTH, SCREEN_HEIGHT,
-                                            self.background)
+        self.scene.draw()
+        # arcade.draw_lrwh_rectangle_textured(0, 0,
+        #                                     SCREEN_WIDTH, SCREEN_HEIGHT,
+        #                                     self.background)
 
         # DRAW ALL SPRITES
         self.coin_list.draw()
@@ -553,15 +574,10 @@ class MyGame(arcade.Window):
             coin.center_x = self.positions[0][i]
             coin.center_y = self.positions[1][i]
 
-        """
-        Movement and game logic
-
-        :param delta_time: TODO
-        """
         # UPDATE PLAYER LOCATION
-        # self.player_sprite.center_x += self.player_sprite.change_x
-        # self.player_sprite.center_y += self.player_sprite.change_y
-        self.player_list.update()
+        self.player_sprite.center_x += self.player_sprite.change_x
+        self.player_sprite.center_y += self.player_sprite.change_y
+        #self.player_list.update()
         self.player_sprite.health_bar.position = (self.player_sprite.center_x,
                                                   self.player_sprite.center_y + HEALTH_BAR_OFFSET,)
 
