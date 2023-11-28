@@ -24,7 +24,7 @@ SPRITE_SCALING_LASER = 0.8
 TILE_SCALING = 1
 
 # SET ENEMY COUNT
-BIRD_COUNT = 15
+BIRD_COUNT = 20
 
 # SET HEALTH & DAMAGE DATA
 HEALTH_BAR_OFFSET = 32
@@ -292,7 +292,7 @@ class MyGame(arcade.Window):
         self.current_key = None
 
         # BOID INFO
-        self.velocities = None
+        velocities = None
 
         # PLAYER INFO
         self.player_sprite = None
@@ -392,11 +392,11 @@ class MyGame(arcade.Window):
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
 
         # RANDOM POSITIONS FOR BOIDS
-        positions = new_flock(BIRD_COUNT, np.array([0, 0]), np.array([SCREEN_WIDTH, SCREEN_HEIGHT]))
-        self.velocities = new_flock(BIRD_COUNT, np.array([0, -5]), np.array([2, 3]))
+        positions = new_flock(BIRD_COUNT, np.array([0, 0]), np.array([SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2]))
+        velocities = new_flock(BIRD_COUNT, np.array([0, 0]), np.array([1, 1]))
 
         # CREATE BOIDS
-        for loc in positions:
+        for loc, vel in zip(positions, velocities):
             # CREATE BOID
             boid = arcade.Sprite("images/bird.gif", SPRITE_SCALING_BIRD)
 
@@ -404,7 +404,10 @@ class MyGame(arcade.Window):
             boid.center_x = loc[0]
             boid.center_y = loc[1]
 
-            # STORE BOID
+            boid.change_x = vel[0]
+            boid.change_y = vel[1]
+
+        # STORE BOID
             self.boid_list.append(boid)
 
         # STORE WHERE ITEMS ARE ON SCREEN
@@ -578,17 +581,43 @@ class MyGame(arcade.Window):
 
         self.current_key = None
 
+    def collision_logic(self, sprite, collide_list, move_back_distance = 20):
+        collision_locations = [(colide.center_x, colide.center_y) for colide in collide_list]
+
+        if sprite.change_y < 0 and sprite.center_y > collision_locations[0][1]:  # trying to move down
+            sprite.center_y += move_back_distance
+        elif sprite.change_y > 0 and sprite.center_y < collision_locations[0][1]: # trying to move up
+            sprite.center_y -= move_back_distance
+        elif sprite.change_x < 0 and sprite.center_x > collision_locations[0][0]:  # trying to left
+            sprite.center_x += move_back_distance
+        elif sprite.change_x > 0 and sprite.center_y < collision_locations[0][0]: # trying to right
+            sprite.center_x -= move_back_distance
+
     def on_update(self, delta_time):
 
-        boid_collide_list = []
-        for boid in self.boid_list:
-            boid_collide_list.append(arcade.check_for_collision_with_list(boid, self.scene_list))
+        for sprite in self.boid_list:
+            boid_collide_list = arcade.check_for_collision_with_list(sprite, self.scene_list)
+
+            if len(boid_collide_list) > 0:
+                collision_locations = [(collide.center_x, collide.center_y) for collide in boid_collide_list]
+
+                if sprite.change_y < 0 and sprite.center_y > collision_locations[0][1]:  # trying to move down
+                    sprite.center_y += 20
+                    sprite.change_y = 0
+                elif sprite.change_y > 0 and sprite.center_y < collision_locations[0][1]: # trying to move up
+                    sprite.center_y -= 20
+                    sprite.change_y = 0
+                elif sprite.change_x < 0 and sprite.center_x > collision_locations[0][0]:  # trying to left
+                    sprite.center_x += 20
+                    sprite.change_x = 0
+                elif sprite.change_x > 0 and sprite.center_y < collision_locations[0][0]: # trying to right
+                    sprite.center_x -= 20
+                    sprite.change_x = 0
 
 
-        if len(boid_collide_list) == 0:
-            self.update_boids(self.boid_list, self.velocities)
-        else:
-            self.update_boids(self.boid_list, self.velocities)
+        self.update_boids(self.boid_list)
+
+
 
 
         # UPDATE PLAYER LOCATION
@@ -599,19 +628,7 @@ class MyGame(arcade.Window):
             self.player_sprite.health_bar.position = (self.player_sprite.center_x,
                                                       self.player_sprite.center_y + HEALTH_BAR_OFFSET,)
         else:
-            collision_locations = [(sprite.center_x, sprite.center_y) for sprite in collide_list]
-            print(f"Player Position Before: ({self.player_sprite.center_x}, {self.player_sprite.center_y})")
-            print(collision_locations[0][1])
-            print(collision_locations)
-
-            if self.player_sprite.change_y < 0 and self.player_sprite.center_y > collision_locations[0][1]:  # trying to move down
-                self.player_sprite.center_y += 20
-            elif self.player_sprite.change_y > 0 and self.player_sprite.center_y < collision_locations[0][1]: # trying to move up
-                self.player_sprite.center_y -= 20
-            elif self.player_sprite.change_x < 0 and self.player_sprite.center_x > collision_locations[0][0]:  # trying to left
-                self.player_sprite.center_x += 20
-            elif self.player_sprite.change_x > 0 and self.player_sprite.center_y < collision_locations[0][0]: # trying to right
-                self.player_sprite.center_x -= 20
+            self.collision_logic(self.player_sprite, collide_list, move_back_distance=40)
 
         # UPDATE PLAYER ANIMATION
         self.player_list.update_animation()
@@ -631,12 +648,6 @@ class MyGame(arcade.Window):
             # UPDATE SCORE
             for boid in hit_list:
 
-                for i, boid2 in enumerate(self.boid_list):
-                    if boid.center_y == boid2.center_y and boid.center_x == boid2.center_x:
-                        del self.velocities[i]
-                        print(self.velocities)
-
-
                 boid.remove_from_sprite_lists()
 
 
@@ -648,6 +659,11 @@ class MyGame(arcade.Window):
 
         # CHECK IF ENEMY HIT PLAYER
         for boid in self.boid_list:
+            if boid.bottom > self.width or boid.top < 0 or boid.right < 0 or boid.left > self.width:
+                boid.remove_from_sprite_lists()
+
+
+
             attack_list = arcade.check_for_collision_with_list(boid, self.player_list)
 
             # ADJUST HEALTH FOR EACH HIT
@@ -687,7 +703,7 @@ class MyGame(arcade.Window):
         # ADD BULLET TO BULLET SPRITE LIST
         self.bullet_list.append(bullet)
 
-    def update_boids(self, boids, velocities):
+    def update_boids(self, boids):
         positions_list = []
         x_positions = []
         y_positions = []
@@ -696,18 +712,19 @@ class MyGame(arcade.Window):
         x_velocities = []
         y_velocities = []
 
-        for boid, velocity in zip(boids, velocities):
+        for boid in boids:
             position = [boid.center_x, boid.center_y]
+            velocity = [boid.change_x, boid.change_y]
 
             if position[0] < self.player_sprite.center_x:
-                velocity[0] = velocity[0] + .2
+                velocity[0] = velocity[0] + .01 * math.log(abs(position[0] - self.player_sprite.center_x))
             elif position[0] > self.player_sprite.center_x:
-                velocity[0] = velocity[0] - .2
+                velocity[0] = velocity[0] - .01 * math.log(abs(position[0] - self.player_sprite.center_x))
 
             if position[1] < self.player_sprite.center_y:
-                velocity[1] = velocity[1] + .2
+                velocity[1] = velocity[1] + .01 * math.log(abs(position[1] - self.player_sprite.center_y))
             elif position[1] > self.player_sprite.center_y:
-                velocity[1] = velocity[1] - .2
+                velocity[1] = velocity[1] - .01 * math.log(abs(position[1] - self.player_sprite.center_y))
 
             x_positions.append(position[0])
             x_velocities.append(velocity[0])
@@ -726,10 +743,10 @@ class MyGame(arcade.Window):
 
 
 
-        move_to_middle_strength = 0.01
-        alert_distance = 300
-        formation_flying_distance = 100000
-        formation_flying_strength = 0.05
+        move_to_middle_strength = 0.02
+        alert_distance = 50
+        formation_flying_distance = 100
+        formation_flying_strength = 0.02
 
         middle = np.mean(positions_list, 1)
         direction_to_middle = positions_list - middle[:, np.newaxis]
@@ -767,10 +784,11 @@ class MyGame(arcade.Window):
             x_vel = velocities_list[0][i]
             y_vel = velocities_list[1][i]
 
+            boid.change_x = x_vel
+            boid.change_y = y_vel
+
             positions.append([x, y])
             velocities.append([x_vel, y_vel])
-
-        self.velocities = velocities
 
 def main():
     """
@@ -782,3 +800,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+#%%
