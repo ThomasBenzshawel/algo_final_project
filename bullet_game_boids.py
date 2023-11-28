@@ -97,6 +97,7 @@ class PlayerCharacter(arcade.Sprite):
 
         # ADJUST COLLISION BOX TO REMOVE EMPTY SPACE.
         self.points = [[-22, -64], [22, -64], [22, 28], [-22, 28]]
+        self.set_hit_box(self.points)
 
     def update_animation(self, delta_time: float = 1 / 60):
         """
@@ -640,7 +641,7 @@ class MyGame(arcade.Window):
 
         # UPDATE PLAYER LOCATION
         collide_list = arcade.check_for_collision_with_list(self.player_sprite, self.scene_list)
-        if len(collide_list) > 0:
+        if len(collide_list) == 0:
             # self.physics_engine.update()
             self.player_list.update()
             self.player_sprite.health_bar.position = (self.player_sprite.center_x,
