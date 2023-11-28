@@ -396,8 +396,8 @@ class MyGame(arcade.Window):
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
 
         # RANDOM POSITIONS FOR BOIDS
-        positions = new_flock(BIRD_COUNT, np.array([0, 0]), np.array([SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2]))
-        velocities = new_flock(BIRD_COUNT, np.array([0, 0]), np.array([1, 1]))
+        positions = new_flock(BIRD_COUNT, np.array([SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2]), np.array([SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2]))
+        velocities = new_flock(BIRD_COUNT, np.array([0, 0]), np.array([.5, .5]))
 
         # CREATE BOIDS
         for loc, vel in zip(positions, velocities):
