@@ -24,15 +24,15 @@ SPRITE_SCALING_LASER = 0.8
 TILE_SCALING = 1
 
 # SET ENEMY COUNT
-BIRD_COUNT = 20
+BIRD_COUNT = 10
 
 # SET HEALTH & DAMAGE DATA
 HEALTH_BAR_OFFSET = 32
-BIRD_DAMAGE = -2
+BIRD_DAMAGE = -0.5
 PLAYER_HEALTH = 100
 
 # SET PLAYER START LOCATION
-STARTX = 650
+STARTX = 450
 STARTY = 200
 
 # SET SCREEN
@@ -676,8 +676,8 @@ class MyGame(arcade.Window):
 
                 # CHECK IF PLAYER IS DEAD, IF NOT UPDATE HEALTH BAR
                 if self.player_sprite.health <= 0:
-                    # arcade.exit()
                     self.player_sprite.health_bar.fullness = (0 / PLAYER_HEALTH)
+                    arcade.exit()
                 else:
                     self.player_sprite.health_bar.fullness = (self.player_sprite.health / PLAYER_HEALTH)
 
