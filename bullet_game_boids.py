@@ -430,7 +430,7 @@ class MyGame(arcade.Window):
         buildings3.center_y = 500
         self.scene_list.append(buildings3)
 
-        buildings4 = arcade.Sprite("images/black1.png", .75)
+        buildings4 = arcade.Sprite("images/black1.png", .5)
         buildings4.center_x = 465
         buildings4.center_y = 320
         self.scene_list.append(buildings4)
