@@ -96,8 +96,10 @@ class PlayerCharacter(arcade.Sprite):
             self.walk_textures.append(texture)
 
         # ADJUST COLLISION BOX TO REMOVE EMPTY SPACE.
-        self.points = [[-22, -64], [22, -64], [22, 28], [-22, 28]]
-        self.set_hit_box(self.points)
+        self.width = 24
+        self.height = 48
+        # self.points = [[-22, -64], [22, -64], [22, -86], [-22, -86]]
+        # self.set_hit_box(self.points)
 
     def update_animation(self, delta_time: float = 1 / 60):
         """
@@ -270,7 +272,7 @@ class MyGame(arcade.Window):
         # SPRITE LISTS
         self.bar_list = None
         self.player_list = None
-        self.coin_list = None
+        self.boid_list = None
         self.bullet_list = None
         self.scene_list = None
 
@@ -286,18 +288,11 @@ class MyGame(arcade.Window):
         self.score = 0
         self.score_text = None
 
-        # SOUNDS
-        # TODO - CHECK
-        self.gun_sound = arcade.sound.load_sound(":resources:sounds/laser1.wav")
-        self.hit_sound = arcade.sound.load_sound(":resources:sounds/phaseJump1.wav")
-
         # SCENE DESIGN
         self.tile_map = None
         self.scene = None
         self.my_map = None
         self.physics_engine = None
-        self.scene_layers = None
-        self.scene_objects = None
 
     def setup(self):
         """
@@ -384,51 +379,33 @@ class MyGame(arcade.Window):
         }
         self.tile_map = arcade.load_tilemap("maps/map.tmj", TILE_SCALING, layer_options)
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
-        self.end_of_map = self.tile_map.width * 32
-
-        # buildings_layer = self.tile_map.object_lists["Buildings"]
-        self.scene_layers = self.tile_map.sprite_lists.keys()
-        self.scene_objects = self.tile_map.sprite_lists.values()
-
-        # print("Keys: ", self.tile_map.sprite_lists.keys())
-        # print("Values: ", self.tile_map.sprite_lists.values())
-        # print("No Ground: ", list(self.tile_map.sprite_lists.values())[1:])
-
-        # self.physics_engine = arcade.PhysicsEnginePlatformer(
-        #     self.player_sprite,
-        #     list(self.tile_map.sprite_lists.values())[1:],
-        #     gravity_constant=PLAYER_SPEED)
 
         # RANDOM POSITIONS FOR BOIDS
         self.positions = new_flock(COIN_COUNT, np.array([0, 0]), np.array([SCREEN_WIDTH, SCREEN_HEIGHT]))
         self.velocities = new_flock(COIN_COUNT, np.array([0, -5]), np.array([2, 3]))
 
-        # Create the coins
+        # CREATE BOIDS
         for i in range(len(self.positions[0])):
-            # Create the coin instance
-            coin = arcade.Sprite("images/bird.gif", SPRITE_SCALING_COIN)
+            # CREATE BOID
+            boid = arcade.Sprite("images/bird.gif", SPRITE_SCALING_COIN)
 
-            # Position the coin
-            coin.center_x = self.positions[0][i]
-            coin.center_y = self.positions[1][i]
+            # POSITION
+            boid.center_x = self.positions[0][i]
+            boid.center_y = self.positions[1][i]
 
-            # Add the coin to the lists
-            self.coin_list.append(coin)
+            # STORE BOID
+            self.boid_list.append(boid)
 
         # STORE WHERE ITEMS ARE ON SCREEN
-        buildings1 = arcade.Sprite("images/black.png", 1)
+        buildings1 = arcade.Sprite("images/black.png")
         buildings1.center_x = 80
         buildings1.center_y = 315
-        hit = buildings1.get_adjusted_hit_box()
-        buildings1.set_hit_box(hit)
-        #buildings1.set_hit_box([(0, 350), (190, 350), (190, 275), (0, 275)])
+        self.scene_list.append(buildings1)
 
         buildings2 = arcade.Sprite("images/black.png", 2)
         buildings2.center_x = 670
         buildings2.center_y = 520
-        hit = buildings2.get_adjusted_hit_box()
-        buildings2.set_hit_box(hit)
-        #buildings2.set_hit_box([(450, 600), (800, 600), (800, 445), (450, 445)])
+        #self.scene_list.append(buildings2)
 
         buildings3 = arcade.Sprite("images/black1.png", 1)
         buildings3.center_x = 110
@@ -485,9 +462,9 @@ class MyGame(arcade.Window):
 
         # ADD UNMOVABLE AREAS
         self.scene_list.append(buildings1)
-        self.scene_list.append(buildings2)
-        self.scene_list.append(buildings3)
-        self.scene_list.append(buildings4)
+        # self.scene_list.append(buildings2)
+        # self.scene_list.append(buildings3)
+        # self.scene_list.append(buildings4)
         # self.scene_list.append(buildings5)
         # self.scene_list.append(trees1)
         # self.scene_list.append(trees2)
@@ -595,7 +572,7 @@ class MyGame(arcade.Window):
 
         :param key: The key that was pressed on the keyboard.
         """
-        # Check if the pressed key is an arrow key
+        # MOVE WITH ARROW KEYS
         if key in MOVEMENT_KEYS:
             if key == arcade.key.LEFT:
                 self.player_sprite.change_x = -PLAYER_SPEED  # move left
@@ -625,7 +602,7 @@ class MyGame(arcade.Window):
         :param key: The key that was pressed on the keyboard.
         :param modifiers: TODO
         """
-        # Stop the scheduled movement update function when the key is released
+        # STOP MOVEMENT
         if key == arcade.key.UP or key == arcade.key.DOWN:
             self.player_sprite.change_y = 0
         elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
@@ -634,10 +611,10 @@ class MyGame(arcade.Window):
     def on_update(self, delta_time):
         self.update_boids(self.positions, self.velocities)
 
-        for i, coin in enumerate(self.coin_list):
-            # Position the coin
-            coin.center_x = self.positions[0][i]
-            coin.center_y = self.positions[1][i]
+        for i, boid in enumerate(self.boid_list):
+            # POSITION
+            boid.center_x = self.positions[0][i]
+            boid.center_y = self.positions[1][i]
 
         # UPDATE PLAYER LOCATION
         collide_list = arcade.check_for_collision_with_list(self.player_sprite, self.scene_list)
@@ -659,15 +636,15 @@ class MyGame(arcade.Window):
         # CHECK IF A BULLET HIT AN ENEMY
         for bullet in self.bullet_list:
             # CHECK IF A ENEMY WAS HIT
-            hit_list = arcade.check_for_collision_with_list(bullet, self.coin_list)
+            hit_list = arcade.check_for_collision_with_list(bullet, self.boid_list)
 
             # REMOVE BULLET IF CONTACT
             if len(hit_list) > 0:
                 bullet.remove_from_sprite_lists()
 
             # UPDATE SCORE
-            for coin in hit_list:
-                coin.remove_from_sprite_lists()
+            for boid in hit_list:
+                boid.remove_from_sprite_lists()
                 self.score += 1
 
             # REMOVE BULLET IF OFF OF SCREEN
@@ -675,8 +652,8 @@ class MyGame(arcade.Window):
                 bullet.remove_from_sprite_lists()
 
         # CHECK IF ENEMY HIT PLAYER
-        for coin in self.coin_list:
-            attack_list = arcade.check_for_collision_with_list(coin, self.player_list)
+        for boid in self.boid_list:
+            attack_list = arcade.check_for_collision_with_list(boid, self.player_list)
 
             # ADJUST HEALTH FOR EACH HIT
             if len(attack_list) > 0:
@@ -754,7 +731,6 @@ class MyGame(arcade.Window):
 
         positions += velocities
 
-
 def main():
     """
     Run application.
@@ -763,8 +739,5 @@ def main():
     game.setup()
     arcade.run()
 
-
 if __name__ == "__main__":
     main()
-
-#%%
