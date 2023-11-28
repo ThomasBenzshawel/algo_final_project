@@ -19,12 +19,12 @@ import numpy as np
 
 # SET SCALING VALUES
 SPRITE_SCALING_PLAYER = 0.5
-SPRITE_SCALING_COIN = 0.02
+SPRITE_SCALING_BIRD = 0.02
 SPRITE_SCALING_LASER = 0.8
 TILE_SCALING = 1
 
 # SET ENEMY COUNT
-COIN_COUNT = 50
+BIRD_COUNT = 15
 
 # SET HEALTH & DAMAGE DATA
 HEALTH_BAR_OFFSET = 32
@@ -243,9 +243,21 @@ def load_texture_pair(filename):
             arcade.load_texture(filename, flipped_horizontally=True)]
 
 
+#TODO UPDATE
 def new_flock(count, lower_limits, upper_limits):
     width = upper_limits - lower_limits
-    return lower_limits[:, np.newaxis] + np.random.rand(2, count) * width[:, np.newaxis]
+    # MAKE THE ARRAYS THE NUMPY WAY
+    x_and_y = lower_limits[:, np.newaxis] + np.random.rand(2, count) * width[:, np.newaxis]
+
+    # Split them into (x, y) tuples
+    position_list = []
+    for i in range(len(x_and_y[0])):
+        x = x_and_y[0][i]
+        y = x_and_y[1][i]
+        
+        position_list.append([x, y])
+        
+    return position_list
 
 
 class MyGame(arcade.Window):
@@ -280,7 +292,6 @@ class MyGame(arcade.Window):
         self.current_key = None
 
         # BOID INFO
-        self.positions = None
         self.velocities = None
 
         # PLAYER INFO
@@ -381,17 +392,17 @@ class MyGame(arcade.Window):
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
 
         # RANDOM POSITIONS FOR BOIDS
-        self.positions = new_flock(COIN_COUNT, np.array([0, 0]), np.array([SCREEN_WIDTH, SCREEN_HEIGHT]))
-        self.velocities = new_flock(COIN_COUNT, np.array([0, -5]), np.array([2, 3]))
+        positions = new_flock(BIRD_COUNT, np.array([0, 0]), np.array([SCREEN_WIDTH, SCREEN_HEIGHT]))
+        self.velocities = new_flock(BIRD_COUNT, np.array([0, -5]), np.array([2, 3]))
 
         # CREATE BOIDS
-        for i in range(len(self.positions[0])):
+        for loc in positions:
             # CREATE BOID
-            boid = arcade.Sprite("images/bird.gif", SPRITE_SCALING_COIN)
+            boid = arcade.Sprite("images/bird.gif", SPRITE_SCALING_BIRD)
 
             # POSITION
-            boid.center_x = self.positions[0][i]
-            boid.center_y = self.positions[1][i]
+            boid.center_x = loc[0]
+            boid.center_y = loc[1]
 
             # STORE BOID
             self.boid_list.append(boid)
@@ -568,15 +579,15 @@ class MyGame(arcade.Window):
         self.current_key = None
 
     def on_update(self, delta_time):
-        self.update_boids(self.positions, self.velocities)
-
-        for i, boid in enumerate(self.boid_list):
-            # POSITION
-            boid.center_x = self.positions[0][i]
-            boid.center_y = self.positions[1][i]
+        self.update_boids(self.boid_list, self.velocities)
 
         # UPDATE PLAYER LOCATION
         collide_list = arcade.check_for_collision_with_list(self.player_sprite, self.scene_list)
+
+        boid_collide_list = []
+        for boid in self.boid_list:
+            boid_collide_list.append(arcade.check_for_collision_with_list(boid, self.scene_list))
+
         if len(collide_list) == 0:
             self.player_list.update()
             self.player_sprite.health_bar.position = (self.player_sprite.center_x,
@@ -614,6 +625,7 @@ class MyGame(arcade.Window):
             # UPDATE SCORE
             for boid in hit_list:
                 boid.remove_from_sprite_lists()
+                #TODO REMOVE THE BOID FROM THE POSITIONS STUFF
                 self.score += 1
 
             # REMOVE BULLET IF OFF OF SCREEN
@@ -661,44 +673,90 @@ class MyGame(arcade.Window):
         # ADD BULLET TO BULLET SPRITE LIST
         self.bullet_list.append(bullet)
 
-    def update_boids(self, positions, velocities):
-        for i in range(len(velocities[0])):
+    def update_boids(self, boids, velocities):
+        positions_list = []
+        x_positions = []
+        y_positions = []
 
-            if positions[0][i] < self.player_sprite.center_x:
-                velocities[0][i] = velocities[0][i] + .5
-            elif positions[0][i] > self.player_sprite.center_x:
-                velocities[0][i] = velocities[0][i] - .5
+        velocities_list = []
+        x_velocities = []
+        y_velocities = []
 
-            if positions[1][i] < self.player_sprite.center_y:
-                velocities[1][i] = velocities[1][i] + .5
-            elif positions[1][i] > self.player_sprite.center_y:
-                velocities[1][i] = velocities[1][i] - .5
+        for boid, velocity in zip(boids, velocities):
+            position = [boid.center_x, boid.center_y]
 
-        move_to_middle_strength = 0.005
-        middle = np.mean(positions, 1)
-        direction_to_middle = positions - middle[:, np.newaxis]
-        velocities -= direction_to_middle * move_to_middle_strength
+            if position[0] < self.player_sprite.center_x:
+                velocity[0] = velocity[0] + .2
+            elif position[0] > self.player_sprite.center_x:
+                velocity[0] = velocity[0] - .2
 
-        separations = positions[:, np.newaxis, :] - positions[:, :, np.newaxis]
+            if position[1] < self.player_sprite.center_y:
+                velocity[1] = velocity[1] + .2
+            elif position[1] > self.player_sprite.center_y:
+                velocity[1] = velocity[1] - .2
+
+            x_positions.append(position[0])
+            x_velocities.append(velocity[0])
+
+            y_positions.append(position[1])
+            y_velocities.append(velocity[1])
+
+        positions_list.append(np.array(x_positions))
+        positions_list.append(np.array(y_positions))
+        positions_list = np.array(positions_list)
+
+        velocities_list.append(np.array(x_velocities))
+        velocities_list.append(np.array(y_velocities))
+        velocities_list = np.array(velocities_list)
+
+
+
+
+        move_to_middle_strength = 0.01
+        alert_distance = 300
+        formation_flying_distance = 100000
+        formation_flying_strength = 0.05
+
+        middle = np.mean(positions_list, 1)
+        direction_to_middle = positions_list - middle[:, np.newaxis]
+        velocities_list -= direction_to_middle * move_to_middle_strength
+
+        separations = positions_list[:, np.newaxis, :] - positions_list[:, :, np.newaxis]
         squared_displacements = separations * separations
         square_distances = np.sum(squared_displacements, 0)
-        alert_distance = 200
+
         far_away = square_distances > alert_distance
         separations_if_close = np.copy(separations)
         separations_if_close[0, :, :][far_away] = 0
         separations_if_close[1, :, :][far_away] = 0
-        velocities += np.sum(separations_if_close, 1)
+        velocities_list += np.sum(separations_if_close, 1)
 
-        velocity_differences = velocities[:, np.newaxis, :] - velocities[:, :, np.newaxis]
-        formation_flying_distance = 100000
-        formation_flying_strength = 0.075
+        velocity_differences = velocities_list[:, np.newaxis, :] - velocities_list[:, :, np.newaxis]
+
         very_far = square_distances > formation_flying_distance
         velocity_differences_if_close = np.copy(velocity_differences)
         velocity_differences_if_close[0, :, :][very_far] = 0
         velocity_differences_if_close[1, :, :][very_far] = 0
-        velocities -= np.mean(velocity_differences_if_close, 1) * formation_flying_strength
+        velocities_list -= np.mean(velocity_differences_if_close, 1) * formation_flying_strength
 
-        positions += velocities
+        positions_list += velocities_list
+
+        positions = []
+        velocities = []
+        for i, boid in enumerate(self.boid_list):
+            x = positions_list[0][i]
+            y = positions_list[1][i]
+
+            boid.center_x = x
+            boid.center_y = y
+
+            x_vel = velocities_list[0][i]
+            y_vel = velocities_list[1][i]
+
+            positions.append([x, y])
+            velocities.append([x_vel, y_vel])
+
+        self.velocities = velocities
 
 def main():
     """
