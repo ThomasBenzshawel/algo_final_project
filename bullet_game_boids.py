@@ -631,7 +631,6 @@ class MyGame(arcade.Window):
             self.player_sprite.change_x = 0
 
     def on_update(self, delta_time):
-
         self.update_boids(self.positions, self.velocities)
 
         for i, coin in enumerate(self.coin_list):
