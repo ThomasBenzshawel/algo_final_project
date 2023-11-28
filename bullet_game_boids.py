@@ -83,9 +83,6 @@ class PlayerCharacter(arcade.Sprite):
         # SCALE PLAYER
         self.scale = SPRITE_SCALING_PLAYER
 
-        # ADJUST COLLISION BOX TO REMOVE EMPTY SPACE.
-        self.points = [[-22, -64], [22, -64], [22, 28], [-22, 28]]
-
         # LOAD SPRITES
         main_path = ":resources:images/animated_characters/robot/robot"
 
@@ -97,6 +94,9 @@ class PlayerCharacter(arcade.Sprite):
         for i in range(8):
             texture = load_texture_pair(f"{main_path}_walk{i}.png")
             self.walk_textures.append(texture)
+
+        # ADJUST COLLISION BOX TO REMOVE EMPTY SPACE.
+        self.points = [[-22, -64], [22, -64], [22, 28], [-22, 28]]
 
     def update_animation(self, delta_time: float = 1 / 60):
         """
@@ -295,11 +295,30 @@ class MyGame(arcade.Window):
         self.scene = None
         self.my_map = None
         self.physics_engine = None
+        self.scene_layers = None
+        self.scene_objects = None
 
     def setup(self):
         """
         Set up the game and initialize the variables.
         """
+        # SPRITE LISTS
+        self.bar_list = arcade.SpriteList()
+        self.player_list = arcade.SpriteList()
+        self.coin_list = arcade.SpriteList()
+        self.bullet_list = arcade.SpriteList()
+        self.scene_list = arcade.SpriteList()
+
+        # RESET SCORE
+        self.score = 0
+
+        # PLAYER
+        self.player_sprite = PlayerCharacter(self.bar_list)
+        self.player_sprite.center_x = 300
+        self.player_sprite.center_y = 150
+        self.player_list.append(self.player_sprite)
+
+        # BACKGROUND
         layer_options = {
             "Buildings": {
                 "use_spatial_hash": True,
@@ -362,33 +381,25 @@ class MyGame(arcade.Window):
                 "use_spatial_hash": True,
             },
         }
-
         self.tile_map = arcade.load_tilemap("maps/map.tmj", TILE_SCALING, layer_options)
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
+        self.end_of_map = self.tile_map.width * 32
 
-        self.physics_engine = arcade.PhysicsEnginePlatformer(
-            self.player_sprite, gravity_constant=2, walls=self.scene["Buildings"]
-        )
+        # buildings_layer = self.tile_map.object_lists["Buildings"]
+        self.scene_layers = self.tile_map.sprite_lists.keys()
+        self.scene_objects = self.tile_map.sprite_lists.values()
 
-        # SPRITE LISTS
-        self.bar_list = arcade.SpriteList()
-        self.player_list = arcade.SpriteList()
-        self.coin_list = arcade.SpriteList()
-        self.bullet_list = arcade.SpriteList()
-        self.scene_list = arcade.SpriteList()
+        # print("Keys: ", self.tile_map.sprite_lists.keys())
+        # print("Values: ", self.tile_map.sprite_lists.values())
+        # print("No Ground: ", list(self.tile_map.sprite_lists.values())[1:])
 
-        # RESET SCORE
-        self.score = 0
-
-        # Image from kenney.nl "
-        self.player_sprite = PlayerCharacter(self.bar_list)
-        self.player_sprite.center_x = 300
-        self.player_sprite.center_y = 150
-        self.player_list.append(self.player_sprite)
+        # self.physics_engine = arcade.PhysicsEnginePlatformer(
+        #     self.player_sprite,
+        #     list(self.tile_map.sprite_lists.values())[1:],
+        #     gravity_constant=PLAYER_SPEED)
 
         # RANDOM POSITIONS FOR BOIDS
         self.positions = new_flock(COIN_COUNT, np.array([0, 0]), np.array([SCREEN_WIDTH, SCREEN_HEIGHT]))
-
         self.velocities = new_flock(COIN_COUNT, np.array([0, -5]), np.array([2, 3]))
 
         # Create the coins
@@ -404,26 +415,33 @@ class MyGame(arcade.Window):
             self.coin_list.append(coin)
 
         # STORE WHERE ITEMS ARE ON SCREEN
-        # buildings1 = arcade.Sprite("images/black.png", 1)
-        # buildings1.center_x = 120
-        # buildings1.center_y = 315
-        # buildings1.set_hit_box([(0, 350), (225, 350), (225, 275), (0, 275)])
-        #
-        # buildings2 = arcade.Sprite("images/black.png", 2)
-        # buildings2.center_x = 600
-        # buildings2.center_y = 500
-        # buildings2.set_hit_box([(375, 585), (800, 585), (800, 425), (375, 425)])
-        #
-        # buildings3 = arcade.Sprite("images/black1.png", 1.25)
-        # buildings3.center_x = 150
-        # buildings3.center_y = 500
-        # buildings3.set_hit_box([(75, 550), (225, 550), (225, 450), (75, 450)])
-        #
-        # buildings4 = arcade.Sprite("images/black1.png", .75)
-        # buildings4.center_x = 410
-        # buildings4.center_y = 295
-        # buildings4.set_hit_box([(365, 325), (455, 325), (455, 268), (365, 268)])
-        #
+        buildings1 = arcade.Sprite("images/black.png", 1)
+        buildings1.center_x = 80
+        buildings1.center_y = 315
+        hit = buildings1.get_adjusted_hit_box()
+        buildings1.set_hit_box(hit)
+        #buildings1.set_hit_box([(0, 350), (190, 350), (190, 275), (0, 275)])
+
+        buildings2 = arcade.Sprite("images/black.png", 2)
+        buildings2.center_x = 670
+        buildings2.center_y = 520
+        hit = buildings2.get_adjusted_hit_box()
+        buildings2.set_hit_box(hit)
+        #buildings2.set_hit_box([(450, 600), (800, 600), (800, 445), (450, 445)])
+
+        buildings3 = arcade.Sprite("images/black1.png", 1)
+        buildings3.center_x = 110
+        buildings3.center_y = 500
+        hit = buildings3.get_adjusted_hit_box()
+        buildings3.set_hit_box(hit)
+        #buildings3.set_hit_box([(50, 540), (225, 540), (225, 460), (50, 460)])
+
+        buildings4 = arcade.Sprite("images/black1.png", .75)
+        buildings4.center_x = 465
+        buildings4.center_y = 320
+        hit = buildings4.get_adjusted_hit_box()
+        buildings4.set_hit_box(hit)
+
         # buildings5 = arcade.Sprite("images/black1.png", 1.25)
         # buildings5.center_x = 125
         # buildings5.center_y = 150
@@ -438,7 +456,7 @@ class MyGame(arcade.Window):
         # trees2.center_x = 300
         # trees2.center_y = -55
         # trees2.set_hit_box([(0, 100), (800, 100), (800, 0), (0, 0)])
-
+        #
         # trees3 = arcade.Sprite("images/black.png", 4)
         # trees3.center_x = 360
         # trees3.center_y = 700
@@ -453,22 +471,22 @@ class MyGame(arcade.Window):
         # trees5.center_x = 850
         # trees5.center_y = 325
         # trees5.set_hit_box([(725, 800), (600, 800), (600, 250), (725, 250)])
-
-        # TESTER
-        # dot = arcade.Sprite("images/dot.png", .01)
-        # dot.center_x = 100
-        # dot.center_y = 600
-
+        #
+        # # # TESTER
+        dot = arcade.Sprite("images/dot.png", .01)
+        dot.center_x = 420
+        dot.center_y = 345
+        #
         # trees6 = arcade.Sprite("images/black1.png", 6)
         # trees6.center_x = -275
         # trees6.center_y = 325
         # trees6.set_hit_box([(0, 600), (100, 600), (100, 0), (0, 0)])
 
         # ADD UNMOVABLE AREAS
-        # self.scene_list.append(buildings1)
-        # self.scene_list.append(buildings2)
-        # self.scene_list.append(buildings3)
-        # self.scene_list.append(buildings4)
+        self.scene_list.append(buildings1)
+        self.scene_list.append(buildings2)
+        self.scene_list.append(buildings3)
+        self.scene_list.append(buildings4)
         # self.scene_list.append(buildings5)
         # self.scene_list.append(trees1)
         # self.scene_list.append(trees2)
@@ -476,7 +494,9 @@ class MyGame(arcade.Window):
         # self.scene_list.append(trees4)
         # self.scene_list.append(trees5)
         # self.scene_list.append(trees6)
-        # # self.scene_list.append(dot)
+        # self.scene_list.append(dot)
+
+        self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, self.scene_list, gravity_constant=0)
 
     def on_draw(self):
         """
@@ -494,7 +514,43 @@ class MyGame(arcade.Window):
         self.bullet_list.draw()
         self.player_list.draw()
         self.bar_list.draw()
-        # self.scene_list.draw()
+        #self.scene_list.draw()
+
+        for sprite in self.scene_list:
+            arcade.draw_rectangle_outline(
+                sprite.center_x,
+                sprite.center_y,
+                sprite.width,
+                sprite.height,
+                arcade.color.RED
+            )
+
+        for sprite in self.bar_list:
+            arcade.draw_rectangle_outline(
+                sprite.center_x,
+                sprite.center_y,
+                sprite.width,
+                sprite.height,
+                arcade.color.GREEN_YELLOW
+            )
+
+        # for sprite in self.coin_list:
+        #     arcade.draw_rectangle_outline(
+        #         sprite.center_x,
+        #         sprite.center_y,
+        #         sprite.width,
+        #         sprite.height,
+        #         arcade.color.BLUE
+        #     )
+
+        for sprite in self.player_list:
+            arcade.draw_rectangle_outline(
+                sprite.center_x,
+                sprite.center_y,
+                sprite.width,
+                sprite.height,
+                arcade.color.PURPLE
+            )
 
         # PUT SCORE ON THE SCREEN
         output = f"Score: {self.score}"
@@ -543,7 +599,7 @@ class MyGame(arcade.Window):
             if key == arcade.key.LEFT:
                 self.player_sprite.change_x = -PLAYER_SPEED  # move left
             elif key == arcade.key.RIGHT:
-                self.player_sprite.change_x = PLAYER_SPEED # move right
+                self.player_sprite.change_x = PLAYER_SPEED  # move right
             elif key == arcade.key.DOWN:
                 self.player_sprite.change_y = -PLAYER_SPEED  # move down
             elif key == arcade.key.UP:
@@ -584,9 +640,16 @@ class MyGame(arcade.Window):
             coin.center_y = self.positions[1][i]
 
         # UPDATE PLAYER LOCATION
-        self.player_list.update()
-        self.player_sprite.health_bar.position = (self.player_sprite.center_x,
-                                                  self.player_sprite.center_y + HEALTH_BAR_OFFSET,)
+        collide_list = arcade.check_for_collision_with_list(self.player_sprite, self.scene_list)
+        if len(collide_list) > 0:
+            # self.physics_engine.update()
+            self.player_list.update()
+            self.player_sprite.health_bar.position = (self.player_sprite.center_x,
+                                                      self.player_sprite.center_y + HEALTH_BAR_OFFSET,)
+        else:
+            print(arcade.check_for_collision_with_list(self.player_sprite, self.scene_list))
+            print(len(arcade.check_for_collision_with_list(self.player_sprite, self.scene_list)))
+
         # UPDATE PLAYER ANIMATION
         self.player_list.update_animation()
 
@@ -603,7 +666,6 @@ class MyGame(arcade.Window):
                 bullet.remove_from_sprite_lists()
 
             # UPDATE SCORE
-            # TODO -- UPDATE
             for coin in hit_list:
                 coin.remove_from_sprite_lists()
                 self.score += 1
