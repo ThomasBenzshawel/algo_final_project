@@ -301,7 +301,7 @@ class MyGame(arcade.Window):
         # SPRITE LISTS
         self.bar_list = arcade.SpriteList()
         self.player_list = arcade.SpriteList()
-        self.coin_list = arcade.SpriteList()
+        self.boid_list = arcade.SpriteList()
         self.bullet_list = arcade.SpriteList()
         self.scene_list = arcade.SpriteList()
 
@@ -405,76 +405,51 @@ class MyGame(arcade.Window):
         buildings2 = arcade.Sprite("images/black.png", 2)
         buildings2.center_x = 670
         buildings2.center_y = 520
-        #self.scene_list.append(buildings2)
+        self.scene_list.append(buildings2)
 
         buildings3 = arcade.Sprite("images/black1.png", 1)
         buildings3.center_x = 110
         buildings3.center_y = 500
-        hit = buildings3.get_adjusted_hit_box()
-        buildings3.set_hit_box(hit)
-        #buildings3.set_hit_box([(50, 540), (225, 540), (225, 460), (50, 460)])
+        self.scene_list.append(buildings3)
 
         buildings4 = arcade.Sprite("images/black1.png", .75)
         buildings4.center_x = 465
         buildings4.center_y = 320
-        hit = buildings4.get_adjusted_hit_box()
-        buildings4.set_hit_box(hit)
+        self.scene_list.append(buildings4)
 
-        # buildings5 = arcade.Sprite("images/black1.png", 1.25)
-        # buildings5.center_x = 125
-        # buildings5.center_y = 150
-        # buildings5.set_hit_box([(50, 200), (200, 200), (200, 100), (50, 100)])
-        #
-        # trees1 = arcade.Sprite("images/black1.png", 3)
-        # trees1.center_x = 700
-        # trees1.center_y = 85
-        # trees1.set_hit_box([(520, 200), (800, 200), (800, 0), (520, 0)])
-        #
-        # trees2 = arcade.Sprite("images/black.png", 4)
-        # trees2.center_x = 300
-        # trees2.center_y = -55
-        # trees2.set_hit_box([(0, 100), (800, 100), (800, 0), (0, 0)])
-        #
-        # trees3 = arcade.Sprite("images/black.png", 4)
-        # trees3.center_x = 360
-        # trees3.center_y = 700
-        # trees3.set_hit_box([(0, 600), (800, 600), (800, 550), (0, 550)])
-        #
-        # trees4 = arcade.Sprite("images/black1.png", 2)
-        # trees4.center_x = 800
-        # trees4.center_y = 450
-        # trees4.set_hit_box([(675, 600), (800, 600), (800, 375), (675, 375)])
-        #
-        # trees5 = arcade.Sprite("images/black1.png", 2)
-        # trees5.center_x = 850
-        # trees5.center_y = 325
-        # trees5.set_hit_box([(725, 800), (600, 800), (600, 250), (725, 250)])
-        #
-        # # # TESTER
-        dot = arcade.Sprite("images/dot.png", .01)
-        dot.center_x = 420
-        dot.center_y = 345
-        #
-        # trees6 = arcade.Sprite("images/black1.png", 6)
-        # trees6.center_x = -275
-        # trees6.center_y = 325
-        # trees6.set_hit_box([(0, 600), (100, 600), (100, 0), (0, 0)])
+        buildings5 = arcade.Sprite("images/black1.png", 1.75)
+        buildings5.center_x = 140
+        buildings5.center_y = 175
+        self.scene_list.append(buildings5)
 
-        # ADD UNMOVABLE AREAS
-        self.scene_list.append(buildings1)
-        # self.scene_list.append(buildings2)
-        # self.scene_list.append(buildings3)
-        # self.scene_list.append(buildings4)
-        # self.scene_list.append(buildings5)
-        # self.scene_list.append(trees1)
-        # self.scene_list.append(trees2)
-        # self.scene_list.append(trees3)
-        # self.scene_list.append(trees4)
-        # self.scene_list.append(trees5)
-        # self.scene_list.append(trees6)
-        # self.scene_list.append(dot)
+        trees1 = arcade.Sprite("images/black1.png", 2)
+        trees1.center_x = 700
+        trees1.center_y = 75
+        self.scene_list.append(trees1)
 
-        self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, self.scene_list, gravity_constant=0)
+        trees2 = arcade.Sprite("images/black.png", 4)
+        trees2.center_x = 300
+        trees2.center_y = -55
+        self.scene_list.append(trees2)
+
+        trees3 = arcade.Sprite("images/black.png", 4)
+        trees3.center_x = 360
+        trees3.center_y = 700
+        self.scene_list.append(trees3)
+
+        trees4 = arcade.Sprite("images/black1.png", 4)
+        trees4.center_x = 985
+        trees4.center_y = 350
+        self.scene_list.append(trees4)
+
+        trees5 = arcade.Sprite("images/black1.png", 6)
+        trees5.center_x = -350
+        trees5.center_y = 325
+        self.scene_list.append(trees5)
+
+        self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite,
+                                                             self.scene_list,
+                                                             gravity_constant=0)
 
     def on_draw(self):
         """
@@ -488,11 +463,10 @@ class MyGame(arcade.Window):
         self.scene.draw()
 
         # DRAW ALL SPRITES
-        self.coin_list.draw()
+        self.boid_list.draw()
         self.bullet_list.draw()
         self.player_list.draw()
         self.bar_list.draw()
-        #self.scene_list.draw()
 
         for sprite in self.scene_list:
             arcade.draw_rectangle_outline(
@@ -502,24 +476,6 @@ class MyGame(arcade.Window):
                 sprite.height,
                 arcade.color.RED
             )
-
-        for sprite in self.bar_list:
-            arcade.draw_rectangle_outline(
-                sprite.center_x,
-                sprite.center_y,
-                sprite.width,
-                sprite.height,
-                arcade.color.GREEN_YELLOW
-            )
-
-        # for sprite in self.coin_list:
-        #     arcade.draw_rectangle_outline(
-        #         sprite.center_x,
-        #         sprite.center_y,
-        #         sprite.width,
-        #         sprite.height,
-        #         arcade.color.BLUE
-        #     )
 
         for sprite in self.player_list:
             arcade.draw_rectangle_outline(
@@ -574,6 +530,7 @@ class MyGame(arcade.Window):
         """
         # MOVE WITH ARROW KEYS
         if key in MOVEMENT_KEYS:
+            self.current_key = key
             if key == arcade.key.LEFT:
                 self.player_sprite.change_x = -PLAYER_SPEED  # move left
             elif key == arcade.key.RIGHT:
@@ -608,6 +565,8 @@ class MyGame(arcade.Window):
         elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
             self.player_sprite.change_x = 0
 
+        self.current_key = None
+
     def on_update(self, delta_time):
         self.update_boids(self.positions, self.velocities)
 
@@ -619,13 +578,23 @@ class MyGame(arcade.Window):
         # UPDATE PLAYER LOCATION
         collide_list = arcade.check_for_collision_with_list(self.player_sprite, self.scene_list)
         if len(collide_list) == 0:
-            # self.physics_engine.update()
             self.player_list.update()
             self.player_sprite.health_bar.position = (self.player_sprite.center_x,
                                                       self.player_sprite.center_y + HEALTH_BAR_OFFSET,)
         else:
-            print(arcade.check_for_collision_with_list(self.player_sprite, self.scene_list))
-            print(len(arcade.check_for_collision_with_list(self.player_sprite, self.scene_list)))
+            collision_locations = [(sprite.center_x, sprite.center_y) for sprite in collide_list]
+            print(f"Player Position Before: ({self.player_sprite.center_x}, {self.player_sprite.center_y})")
+            print(collision_locations[0][1])
+            print(collision_locations)
+
+            if self.player_sprite.change_y < 0 and self.player_sprite.center_y > collision_locations[0][1]:  # trying to move down
+                self.player_sprite.center_y += 20
+            elif self.player_sprite.change_y > 0 and self.player_sprite.center_y < collision_locations[0][1]: # trying to move up
+                self.player_sprite.center_y -= 20
+            elif self.player_sprite.change_x < 0 and self.player_sprite.center_x > collision_locations[0][0]:  # trying to left
+                self.player_sprite.center_x += 20
+            elif self.player_sprite.change_x > 0 and self.player_sprite.center_y < collision_locations[0][0]: # trying to right
+                self.player_sprite.center_x -= 20
 
         # UPDATE PLAYER ANIMATION
         self.player_list.update_animation()
