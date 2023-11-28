@@ -31,6 +31,10 @@ HEALTH_BAR_OFFSET = 32
 BIRD_DAMAGE = -2
 PLAYER_HEALTH = 100
 
+# SET PLAYER START LOCATION
+STARTX = 650
+STARTY = 200
+
 # SET SCREEN
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
@@ -321,8 +325,8 @@ class MyGame(arcade.Window):
 
         # PLAYER
         self.player_sprite = PlayerCharacter(self.bar_list)
-        self.player_sprite.center_x = 300
-        self.player_sprite.center_y = 150
+        self.player_sprite.center_x = STARTX
+        self.player_sprite.center_y = STARTY
         self.player_list.append(self.player_sprite)
 
         # BACKGROUND
@@ -431,7 +435,7 @@ class MyGame(arcade.Window):
         buildings4.center_y = 320
         self.scene_list.append(buildings4)
 
-        buildings5 = arcade.Sprite("images/black1.png", 1.75)
+        buildings5 = arcade.Sprite("images/black1.png", 2)
         buildings5.center_x = 140
         buildings5.center_y = 175
         self.scene_list.append(buildings5)

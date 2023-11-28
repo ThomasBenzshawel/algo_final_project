@@ -3,11 +3,55 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "",
+    "activeFile": "map.tmj",
     "expandedProjectPaths": [
     ],
     "fileStates": {
         "": {
+            "scaleInDock": 1
+        },
+        "map.tmj": {
+            "expandedGroupLayers": [
+                23
+            ],
+            "scale": 0.75,
+            "selectedLayer": 20,
+            "viewCenter": {
+                "x": 609.9999999999999,
+                "y": 237.99999999999994
+            }
+        },
+        "map.tmj#bike": {
+            "scaleInDock": 1
+        },
+        "map.tmj#building1": {
+            "scaleInDock": 1
+        },
+        "map.tmj#building2": {
+            "scaleInDock": 1
+        },
+        "map.tmj#building3": {
+            "scaleInDock": 1
+        },
+        "map.tmj#building4": {
+            "scaleInDock": 1
+        },
+        "map.tmj#building5": {
+            "scaleInDock": 1
+        },
+        "map.tmj#bush_resized": {
+            "scaleInDock": 1
+        },
+        "map.tmj#fountain": {
+            "scaleInDock": 1
+        },
+        "map.tmj#grass": {
+            "scaleInDock": 1
+        },
+        "map.tmj#path_resized": {
+            "scaleInDock": 1
+        },
+        "map.tmj#tree": {
             "scaleInDock": 1
         }
     },
@@ -16,9 +60,11 @@
     "map.lastUsedFormat": "json",
     "map.width": 25,
     "openFiles": [
+        "map.tmj"
     ],
     "project": "map.tiled-project",
     "recentFiles": [
+        "map.tmj"
     ],
     "tileset.embedInMap": true,
     "tileset.tileSize": {
