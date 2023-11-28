@@ -579,14 +579,20 @@ class MyGame(arcade.Window):
         self.current_key = None
 
     def on_update(self, delta_time):
-        self.update_boids(self.boid_list, self.velocities)
-
-        # UPDATE PLAYER LOCATION
-        collide_list = arcade.check_for_collision_with_list(self.player_sprite, self.scene_list)
 
         boid_collide_list = []
         for boid in self.boid_list:
             boid_collide_list.append(arcade.check_for_collision_with_list(boid, self.scene_list))
+
+
+        if len(boid_collide_list) == 0:
+            self.update_boids(self.boid_list, self.velocities)
+        else:
+            self.update_boids(self.boid_list, self.velocities)
+
+
+        # UPDATE PLAYER LOCATION
+        collide_list = arcade.check_for_collision_with_list(self.player_sprite, self.scene_list)
 
         if len(collide_list) == 0:
             self.player_list.update()
@@ -624,8 +630,16 @@ class MyGame(arcade.Window):
 
             # UPDATE SCORE
             for boid in hit_list:
+
+                for i, boid2 in enumerate(self.boid_list):
+                    if boid.center_y == boid2.center_y and boid.center_x == boid2.center_x:
+                        del self.velocities[i]
+                        print(self.velocities)
+
+
                 boid.remove_from_sprite_lists()
-                #TODO REMOVE THE BOID FROM THE POSITIONS STUFF
+
+
                 self.score += 1
 
             # REMOVE BULLET IF OFF OF SCREEN
