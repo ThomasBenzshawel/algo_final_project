@@ -4,28 +4,28 @@ import os
 
 # --- Constants ---
 SPRITE_SCALING_PLAYER = 0.5
-SPRITE_SCALING_COIN = 0.2
-COIN_COUNT = 50
+SPRITE_SCALING_BIRD = 0.02
+BIRD_COUNT = 50
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 SCREEN_TITLE = "Sprite Follow Player Simple Example"
 
 CHARACTER_SPRITE_SPEED = 5
-COIN_SPRITE_SPEED = 3
+BIRD_SPRITE_SPEED = 2
 
 
-class Coin(arcade.Sprite):
+class Bird(arcade.Sprite):
     def follow_sprite(self, player_sprite):
         if self.center_y < player_sprite.center_y:
-            self.center_y += min(COIN_SPRITE_SPEED, player_sprite.center_y - self.center_y)
+            self.center_y += min(BIRD_SPRITE_SPEED, player_sprite.center_y - self.center_y)
         elif self.center_y > player_sprite.center_y:
-            self.center_y -= min(COIN_SPRITE_SPEED, self.center_y - player_sprite.center_y)
+            self.center_y -= min(BIRD_SPRITE_SPEED, self.center_y - player_sprite.center_y)
 
         if self.center_x < player_sprite.center_x:
-            self.center_x += min(COIN_SPRITE_SPEED, player_sprite.center_x - self.center_x)
+            self.center_x += min(BIRD_SPRITE_SPEED, player_sprite.center_x - self.center_x)
         elif self.center_x > player_sprite.center_x:
-            self.center_x -= min(COIN_SPRITE_SPEED, self.center_x - player_sprite.center_x)
+            self.center_x -= min(BIRD_SPRITE_SPEED, self.center_x - player_sprite.center_x)
 
 
 class MyGame(arcade.Window):
@@ -34,7 +34,7 @@ class MyGame(arcade.Window):
         file_path = os.path.dirname(os.path.abspath(__file__))
         os.chdir(file_path)
         self.player_list = None
-        self.coin_list = None
+        self.bird_list = None
         self.player_sprite = None
         self.score = 0
         self.keys_pressed = set()
@@ -43,7 +43,7 @@ class MyGame(arcade.Window):
 
     def setup(self):
         self.player_list = arcade.SpriteList()
-        self.coin_list = arcade.SpriteList()
+        self.bird_list = arcade.SpriteList()
         self.score = 0
 
         self.player_sprite = arcade.Sprite(":resources:images/animated_characters/female_person/"
@@ -52,15 +52,15 @@ class MyGame(arcade.Window):
         self.player_sprite.center_y = 50
         self.player_list.append(self.player_sprite)
 
-        for i in range(COIN_COUNT):
-            coin = Coin(":resources:images/items/coinGold.png", SPRITE_SCALING_COIN)
+        for i in range(BIRD_COUNT):
+            coin = Bird("images/bird.gif", SPRITE_SCALING_BIRD)
             coin.center_x = random.randrange(SCREEN_WIDTH)
             coin.center_y = random.randrange(SCREEN_HEIGHT)
-            self.coin_list.append(coin)
+            self.bird_list.append(coin)
 
     def on_draw(self):
         self.clear()
-        self.coin_list.draw()
+        self.bird_list.draw()
         self.player_list.draw()
         output = f"Score: {self.score}"
         arcade.draw_text(output, 10, 20, arcade.color.WHITE, 14)
@@ -84,13 +84,13 @@ class MyGame(arcade.Window):
         self.player_sprite.center_x = max(0, min(self.player_sprite.center_x, SCREEN_WIDTH))
         self.player_sprite.center_y = max(0, min(self.player_sprite.center_y, SCREEN_HEIGHT))
 
-        for coin in self.coin_list:
-            coin.follow_sprite(self.player_sprite)
+        for bird in self.bird_list:
+            bird.follow_sprite(self.player_sprite)
 
-        hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.coin_list)
+        hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.bird_list)
 
-        for coin in hit_list:
-            coin.remove_from_sprite_lists()
+        for bird in hit_list:
+            bird.remove_from_sprite_lists()
             self.score += 1
 
 
