@@ -1,5 +1,6 @@
 """
-Project modeled after basic set up from: https://api.arcade.academy/en/2.6.1/examples/sprite_bullets_aimed.html#sprite-bullets-aimed
+Project modeled after basic set up from:
+https://api.arcade.academy/en/2.6.1/examples/sprite_bullets_aimed.html#sprite-bullets-aimed
 Sprite Bullets
 
 Simple program to show basic sprite usage.
@@ -32,8 +33,8 @@ BIRD_DAMAGE = -0.5
 PLAYER_HEALTH = 100
 
 # SET PLAYER START LOCATION
-STARTX = 450
-STARTY = 200
+START_X = 450
+START_Y = 200
 
 # SET SCREEN
 SCREEN_WIDTH = 800
@@ -247,7 +248,6 @@ def load_texture_pair(filename):
             arcade.load_texture(filename, flipped_horizontally=True)]
 
 
-#TODO UPDATE
 def new_flock(count, lower_limits, upper_limits):
     width = upper_limits - lower_limits
     # MAKE THE ARRAYS THE NUMPY WAY
@@ -325,8 +325,8 @@ class MyGame(arcade.Window):
 
         # PLAYER
         self.player_sprite = PlayerCharacter(self.bar_list)
-        self.player_sprite.center_x = STARTX
-        self.player_sprite.center_y = STARTY
+        self.player_sprite.center_x = START_X
+        self.player_sprite.center_y = START_Y
         self.player_list.append(self.player_sprite)
 
         # BACKGROUND
@@ -396,7 +396,8 @@ class MyGame(arcade.Window):
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
 
         # RANDOM POSITIONS FOR BOIDS
-        positions = new_flock(BIRD_COUNT, np.array([SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2]), np.array([SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2]))
+        positions = new_flock(BIRD_COUNT, np.array([SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2]),
+                              np.array([SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2]))
         velocities = new_flock(BIRD_COUNT, np.array([0, 0]), np.array([.5, .5]))
 
         # CREATE BOIDS
@@ -508,38 +509,6 @@ class MyGame(arcade.Window):
         output = f"Score: {self.score}"
         arcade.draw_text(output, 10, 20, arcade.color.WHITE, 14)
 
-    def on_mouse_press(self, x, y, button, modifiers):
-        """
-        Called whenever the mouse button is clicked.
-        TODO -- REMOVE??
-        """
-        # Create a bullet
-        bullet = arcade.Sprite(":resources:images/space_shooter/laserBlue01.png",
-                               SPRITE_SCALING_LASER)
-
-        # Position the bullet at the player's current location
-        start_x = self.player_sprite.center_x
-        start_y = self.player_sprite.center_y
-        bullet.center_x = start_x
-        bullet.center_y = start_y
-
-        # Get from the mouse the destination location for the bullet
-        dest_x = x
-        dest_y = y
-
-        # Calculate how to get the bullet to the destination.
-        x_diff = dest_x - start_x
-        y_diff = dest_y - start_y
-        angle = math.atan2(y_diff, x_diff)
-
-        # Set the bullet's angle and velocity
-        bullet.angle = math.degrees(angle)
-        bullet.change_x = math.cos(angle) * BULLET_SPEED
-        bullet.change_y = math.sin(angle) * BULLET_SPEED
-
-        # Add the bullet to the appropriate lists
-        self.bullet_list.append(bullet)
-
     def on_key_press(self, key, modifiers):
         """
         Called whenever a key is pressed. Perform the corresponding actions.
@@ -573,9 +542,8 @@ class MyGame(arcade.Window):
         """
         Called whenever a key is released. Perform the corresponding actions.
 
-        :param self: TODO
+        :param self: Game Object
         :param key: The key that was pressed on the keyboard.
-        :param modifiers: TODO
         """
         # STOP MOVEMENT
         if key == arcade.key.UP or key == arcade.key.DOWN:
@@ -585,16 +553,16 @@ class MyGame(arcade.Window):
 
         self.current_key = None
 
-    def collision_logic(self, sprite, collide_list, move_back_distance = 20):
-        collision_locations = [(colide.center_x, colide.center_y) for colide in collide_list]
+    def collision_logic(self, sprite, collide_list, move_back_distance=20):
+        collision_locations = [(collide.center_x, collide.center_y) for collide in collide_list]
 
         if sprite.change_y < 0 and sprite.center_y > collision_locations[0][1]:  # trying to move down
             sprite.center_y += move_back_distance
-        elif sprite.change_y > 0 and sprite.center_y < collision_locations[0][1]: # trying to move up
+        elif sprite.change_y > 0 and sprite.center_y < collision_locations[0][1]:  # trying to move up
             sprite.center_y -= move_back_distance
-        elif sprite.change_x < 0 and sprite.center_x > collision_locations[0][0]:  # trying to left
+        elif sprite.change_x < 0 and sprite.center_x > collision_locations[0][0]:  # trying to move left
             sprite.center_x += move_back_distance
-        elif sprite.change_x > 0 and sprite.center_y < collision_locations[0][0]: # trying to right
+        elif sprite.change_x > 0 and sprite.center_y < collision_locations[0][0]:  # trying to right
             sprite.center_x -= move_back_distance
 
     def on_update(self, delta_time):
@@ -608,21 +576,17 @@ class MyGame(arcade.Window):
                 if sprite.change_y < 0 and sprite.center_y > collision_locations[0][1]:  # trying to move down
                     sprite.center_y += 20
                     sprite.change_y = 0
-                elif sprite.change_y > 0 and sprite.center_y < collision_locations[0][1]: # trying to move up
+                elif sprite.change_y > 0 and sprite.center_y < collision_locations[0][1]:  # trying to move up
                     sprite.center_y -= 20
                     sprite.change_y = 0
-                elif sprite.change_x < 0 and sprite.center_x > collision_locations[0][0]:  # trying to left
+                elif sprite.change_x < 0 and sprite.center_x > collision_locations[0][0]:  # trying to move left
                     sprite.center_x += 20
                     sprite.change_x = 0
-                elif sprite.change_x > 0 and sprite.center_y < collision_locations[0][0]: # trying to right
+                elif sprite.change_x > 0 and sprite.center_y < collision_locations[0][0]:  # trying to right
                     sprite.center_x -= 20
                     sprite.change_x = 0
 
-
         self.update_boids(self.boid_list)
-
-
-
 
         # UPDATE PLAYER LOCATION
         collide_list = arcade.check_for_collision_with_list(self.player_sprite, self.scene_list)
@@ -651,9 +615,7 @@ class MyGame(arcade.Window):
 
             # UPDATE SCORE
             for boid in hit_list:
-
                 boid.remove_from_sprite_lists()
-
 
                 self.score += 1
 
@@ -665,8 +627,6 @@ class MyGame(arcade.Window):
         for boid in self.boid_list:
             if boid.bottom > self.width or boid.top < 0 or boid.right < 0 or boid.left > self.width:
                 boid.remove_from_sprite_lists()
-
-
 
             attack_list = arcade.check_for_collision_with_list(boid, self.player_list)
 
@@ -744,9 +704,6 @@ class MyGame(arcade.Window):
         velocities_list.append(np.array(y_velocities))
         velocities_list = np.array(velocities_list)
 
-
-
-
         move_to_middle_strength = 0.02
         alert_distance = 50
         formation_flying_distance = 100
@@ -794,6 +751,7 @@ class MyGame(arcade.Window):
             positions.append([x, y])
             velocities.append([x_vel, y_vel])
 
+
 def main():
     """
     Run application.
@@ -801,6 +759,7 @@ def main():
     game = MyGame()
     game.setup()
     arcade.run()
+
 
 if __name__ == "__main__":
     main()
