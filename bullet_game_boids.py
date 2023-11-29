@@ -487,24 +487,6 @@ class MyGame(arcade.Window):
         self.player_list.draw()
         self.bar_list.draw()
 
-        for sprite in self.scene_list:
-            arcade.draw_rectangle_outline(
-                sprite.center_x,
-                sprite.center_y,
-                sprite.width,
-                sprite.height,
-                arcade.color.RED
-            )
-
-        for sprite in self.player_list:
-            arcade.draw_rectangle_outline(
-                sprite.center_x,
-                sprite.center_y,
-                sprite.width,
-                sprite.height,
-                arcade.color.PURPLE
-            )
-
         # PUT SCORE ON THE SCREEN
         output = f"Score: {self.score}"
         arcade.draw_text(output, 10, 20, arcade.color.WHITE, 14)
