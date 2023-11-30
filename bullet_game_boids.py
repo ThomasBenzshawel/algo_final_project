@@ -1,14 +1,13 @@
 """
 Project modeled after basic set up from:
 https://api.arcade.academy/en/2.6.1/examples/sprite_bullets_aimed.html#sprite-bullets-aimed
-Sprite Bullets
 
-Simple program to show basic sprite usage.
+Project adjusted by:
+Sabryn Bley
+Thomas Benzshawel
 
-Artwork from https://kenney.nl
-
-If Python and Arcade are installed, this example can be run from the command line with:
-python -m arcade.examples.sprite_bullets_aimed
+Game using boids algorithm as enemy movement system.
+Required libraries to run are: typing, arcade, math, os, and numpy
 """
 
 # IMPORT LIBRARIES
@@ -25,11 +24,11 @@ SPRITE_SCALING_LASER = 0.8
 TILE_SCALING = 1
 
 # SET ENEMY COUNT
-BIRD_COUNT = 10
+BIRD_COUNT = 5
 
 # SET HEALTH & DAMAGE DATA
 HEALTH_BAR_OFFSET = 32
-BIRD_DAMAGE = -0.5
+BIRD_DAMAGE = -2
 PLAYER_HEALTH = 100
 
 # SET PLAYER START LOCATION
@@ -618,8 +617,8 @@ class MyGame(arcade.Window):
 
                 # CHECK IF PLAYER IS DEAD, IF NOT UPDATE HEALTH BAR
                 if self.player_sprite.health <= 0:
-                    self.player_sprite.health_bar.fullness = (0 / PLAYER_HEALTH)
                     arcade.exit()
+                    self.player_sprite.health_bar.fullness = (0 / PLAYER_HEALTH)
                 else:
                     self.player_sprite.health_bar.fullness = (self.player_sprite.health / PLAYER_HEALTH)
 

@@ -1,13 +1,13 @@
 """
-Project modeled after basic set up from: https://api.arcade.academy/en/2.6.1/examples/sprite_bullets_aimed.html#sprite-bullets-aimed
-Sprite Bullets
+Project modeled after basic set up from:
+https://api.arcade.academy/en/2.6.1/examples/sprite_bullets_aimed.html#sprite-bullets-aimed
 
-Simple program to show basic sprite usage.
+Project adjusted by:
+Sabryn Bley
+Thomas Benzshawel
 
-Artwork from https://kenney.nl
-
-If Python and Arcade are installed, this example can be run from the command line with:
-python -m arcade.examples.sprite_bullets_aimed
+Game using basic following as enemy movement system.
+Required libraries to run are: typing, arcade, math, os, and numpy
 """
 
 # IMPORT LIBRARIES
@@ -32,8 +32,8 @@ BIRD_DAMAGE = -0.5
 PLAYER_HEALTH = 100
 
 # SET PLAYER START LOCATION
-STARTX = 450
-STARTY = 200
+START_X = 450
+START_Y = 200
 
 # SET SCREEN
 SCREEN_WIDTH = 800
@@ -319,8 +319,8 @@ class MyGame(arcade.Window):
 
         # PLAYER
         self.player_sprite = PlayerCharacter(self.bar_list)
-        self.player_sprite.center_x = STARTX
-        self.player_sprite.center_y = STARTY
+        self.player_sprite.center_x = START_X
+        self.player_sprite.center_y = START_Y
         self.player_list.append(self.player_sprite)
 
         # BACKGROUND
@@ -522,11 +522,11 @@ class MyGame(arcade.Window):
 
         if sprite.change_y < 0 and sprite.center_y > collision_locations[0][1]:  # trying to move down
             sprite.center_y += move_back_distance
-        elif sprite.change_y > 0 and sprite.center_y < collision_locations[0][1]: # trying to move up
+        elif sprite.change_y > 0 and sprite.center_y < collision_locations[0][1]:  # trying to move up
             sprite.center_y -= move_back_distance
-        elif sprite.change_x < 0 and sprite.center_x > collision_locations[0][0]:  # trying to left
+        elif sprite.change_x < 0 and sprite.center_x > collision_locations[0][0]:  # trying to move left
             sprite.center_x += move_back_distance
-        elif sprite.change_x > 0 and sprite.center_y < collision_locations[0][0]: # trying to right
+        elif sprite.change_x > 0 and sprite.center_y < collision_locations[0][0]:  # trying to move right
             sprite.center_x -= move_back_distance
 
     def on_update(self, delta_time):
@@ -540,13 +540,13 @@ class MyGame(arcade.Window):
                 if sprite.change_y < 0 and sprite.center_y > collision_locations[0][1]:  # trying to move down
                     sprite.center_y += 20
                     sprite.change_y = 0
-                elif sprite.change_y > 0 and sprite.center_y < collision_locations[0][1]: # trying to move up
+                elif sprite.change_y > 0 and sprite.center_y < collision_locations[0][1]:  # trying to move up
                     sprite.center_y -= 20
                     sprite.change_y = 0
-                elif sprite.change_x < 0 and sprite.center_x > collision_locations[0][0]:  # trying to left
+                elif sprite.change_x < 0 and sprite.center_x > collision_locations[0][0]:  # trying to move left
                     sprite.center_x += 20
                     sprite.change_x = 0
-                elif sprite.change_x > 0 and sprite.center_y < collision_locations[0][0]: # trying to right
+                elif sprite.change_x > 0 and sprite.center_y < collision_locations[0][0]:  # trying to move right
                     sprite.center_x -= 20
                     sprite.change_x = 0
             sprite.follow_sprite(self.player_sprite)
