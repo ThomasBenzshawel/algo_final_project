@@ -53,7 +53,7 @@ class MyGame(arcade.Window):
         self.player_list.append(self.player_sprite)
 
         for i in range(BIRD_COUNT):
-            coin = Bird("images/bird.gif", SPRITE_SCALING_BIRD)
+            coin = Bird("../images/bird.gif", SPRITE_SCALING_BIRD)
             coin.center_x = random.randrange(SCREEN_WIDTH)
             coin.center_y = random.randrange(SCREEN_HEIGHT)
             self.bird_list.append(coin)

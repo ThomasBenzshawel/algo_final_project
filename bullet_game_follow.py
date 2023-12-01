@@ -8,6 +8,7 @@ Thomas Benzshawel
 
 Game using basic following as enemy movement system.
 Required libraries to run are: typing, arcade, math, os, and numpy
+Requires healthbar.py
 """
 
 # IMPORT LIBRARIES

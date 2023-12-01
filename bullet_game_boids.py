@@ -8,6 +8,7 @@ Thomas Benzshawel
 
 Game using boids algorithm as enemy movement system.
 Required libraries to run are: typing, arcade, math, os, and numpy
+Requires boids_algorithm.ipynb and healthbar.py
 """
 
 # IMPORT LIBRARIES
